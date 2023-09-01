@@ -1,0 +1,47 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "allwinner,sun50i-h616";
+
+	fragment@0 {
+		target = <&spi1>;
+		 __overlay__ {
+			#address-cells = <1>;
+   			#size-cells = <0>;
+			status = "okay";
+			lcd@0{
+				compatible = "sitronix,st7796";
+				reg = <0>;
+				spi-max-frequency = <50000000>;
+				status = "okay";
+
+				dc-gpios = <&pio  2 14 0>; /* PC14  GPIO_ACTIVE_HIGH*/
+				reset-gpios = <&pio 2 15 1>; /* PC15  GPIO_ACTIVE_LOW */
+				rotate = <90>;
+				buswidth = <8>;
+				regwidth = <10>;
+				fps = <30>;
+				bgr = <0> ;
+				debug = <0x00>;
+			};
+			
+			touch@1{
+				compatible = "ti,ads7846";
+				reg = <0x1>;
+				spi-max-frequency = <2000000>;
+				status = "okay";
+
+				interrupt-parent = <&pio>;
+				interrupts = <2 9 8>; /* PC9 IRQ_TYPE_LEVEL_LOW */
+				pendown-gpio = <&pio  2 9 0>;
+
+			};
+
+
+		};
+	};
+	
+
+
+};

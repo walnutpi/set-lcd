@@ -1,0 +1,11 @@
+
+
+dtb_name=tft35
+module_tft=fb_st7796
+module_touch=ads7846
+
+help_str=" \
+01studio \
+IC:st7796   \
+size: 640*320 3.5\"  \
+"

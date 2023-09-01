@@ -1,0 +1,21 @@
+#!/bin/bash
+
+PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+
+
+chmod +x set-lcd
+bin_path="/usr/bin/set-lcd"
+if [ ! -e "${bin_path}" ]; then
+    ln -s ${PATH_PWD}/set-lcd ${bin_path}
+fi
+
+cp ${PATH_PWD}/completion.sh  /etc/bash_completion.d/set-lcd
+source /etc/bash_completion.d/set-lcd
+
+bash_str="source /etc/bash_completion.d/set-lcd"
+if ! grep -q  ${bash_str}  /etc/bash.bashrc; then
+    echo ${bash_str} >> /etc/bash.bashrc
+fi
+
+
+echo -e "\033[32m[ok]\033[0m"
