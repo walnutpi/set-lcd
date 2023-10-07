@@ -1,1 +1,11 @@
 *.dtbo
+*.d
+*.o
+*.cmd
+*.mod
+*.mod.c
+*.ko
+*.symvers
+*.order
+build/
+*.tmp*/

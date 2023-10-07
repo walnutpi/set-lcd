@@ -1,7 +1,66 @@
 #!/bin/bash
 
-PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+set -e
 
+echo_red() {
+    echo -e "\r\033[31m$1\033[0m"
+}
+echo_green() {
+    echo -e "\r\033[32m$1\033[0m"
+}
+echo_blue() {
+    echo -e "\r\033[36m$1\033[0m"
+}
+
+
+PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+VERSION=$(uname -r)
+VERSION_digit=${VERSION:0:1}
+
+
+
+
+# 判断linux版本是否支持
+case $VERSION_digit in
+    5|6)
+        echo_green "[OK]\t linux version $VERSION is support"
+    ;;
+    *)
+        echo_red "\n\nERROR: no support you linux version : \t$VERSION \n\n"
+        exit -1
+    ;;
+esac
+
+
+
+# 树莓派要安装kernel-headers
+Board_model=$(cat "/proc/device-tree/model")
+case $Board_model in
+    Raspberry*)
+        echo_blue "Start to install the raspberrypi-kernel-headers"
+        apt install raspberrypi-kernel-headers
+        
+        if [[ -f /usr/lib/modules/$(uname -r)//build/Makefile ]]; then
+            echo_green "[OK]\t kernel-headers has been installed"
+        else
+            echo_red "\n\nERROR: can not find kernel-headers \n\n"
+        fi
+        
+        # 编译安装驱动
+        echo_blue "Start to compile driver source code"
+        make -C drivers/
+        make -C drivers/ output
+        echo_green "[OK]\t drivers are ready"
+
+    ;;
+    walnutpi*)
+        
+    ;;
+esac
+
+
+
+echo_blue "Start to install the set-lcd command"
 
 chmod +x set-lcd
 bin_path="/usr/bin/set-lcd"
@@ -10,12 +69,15 @@ if [ ! -e "${bin_path}" ]; then
 fi
 
 cp ${PATH_PWD}/completion.sh  /etc/bash_completion.d/set-lcd
-source /etc/bash_completion.d/set-lcd
+
 
 bash_str="source /etc/bash_completion.d/set-lcd"
 if ! grep -q  ${bash_str}  /etc/bash.bashrc; then
     echo ${bash_str} >> /etc/bash.bashrc
 fi
 
+echo_green "[OK]\t set-lcd is ready"
 
-echo -e "\033[32m[ok]\033[0m"
+echo_green "\n\nplease run this command :"
+echo_green "\n\t source /etc/bash_completion.d/set-lcd \n\n"
+# echo -e "\033[32m[ok]\033[0m"
