@@ -23,7 +23,7 @@ VERSION_digit=${VERSION:0:1}
 # 判断linux版本是否支持
 case $VERSION_digit in
     5|6)
-        echo_green "[OK]\t linux version $VERSION is support"
+        echo_green "[OK]\t linux version is $VERSION "
     ;;
     *)
         echo_red "\n\nERROR: no support you linux version : \t$VERSION \n\n"
@@ -31,7 +31,8 @@ case $VERSION_digit in
     ;;
 esac
 
-
+sudo apt-get update
+sudo apt-get install xserver-xorg-input-evdev cmake -y
 
 # 树莓派要安装kernel-headers
 Board_model=$(cat "/proc/device-tree/model")
@@ -51,8 +52,21 @@ case $Board_model in
         make -C drivers/
         make -C drivers/ output
         echo_green "[OK]\t drivers are ready"
-
+        
+        # 安装fbcp
+        echo_blue "Start to compile the rpi-fbcp"
+        cp $PATH_PWD/rpi-fbcp/fbcp.service /lib/systemd/system/
+        if [[ ! -d $PATH_PWD/rpi-fbcp/build ]]; then
+            mkdir $PATH_PWD/rpi-fbcp/build
+        fi
+        cd $PATH_PWD/rpi-fbcp/build/
+        cmake ..
+        make
+        install fbcp /usr/local/bin/fbcp
+        echo_green "[OK]\t rpi-fbcp is ready"
+        cd $PATH_PWD
     ;;
+    
     walnutpi*)
         
     ;;
@@ -62,12 +76,14 @@ esac
 
 echo_blue "Start to install the set-lcd command"
 
-chmod +x set-lcd
+chmod +x $PATH_PWD/set-lcd
 bin_path="/usr/bin/set-lcd"
 if [ ! -e "${bin_path}" ]; then
     ln -s ${PATH_PWD}/set-lcd ${bin_path}
 fi
-
+if [[ ! -d /etc/bash_completion.d/ ]]; then
+    mkdir /etc/bash_completion.d/
+fi
 cp ${PATH_PWD}/completion.sh  /etc/bash_completion.d/set-lcd
 
 
