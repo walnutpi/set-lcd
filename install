@@ -55,7 +55,6 @@ case $Board_model in
         
         # 安装fbcp
         echo_blue "Start to compile the rpi-fbcp"
-        cp $PATH_PWD/rpi-fbcp/fbcp.service /lib/systemd/system/
         if [[ ! -d $PATH_PWD/rpi-fbcp/build ]]; then
             mkdir $PATH_PWD/rpi-fbcp/build
         fi
@@ -71,6 +70,7 @@ case $Board_model in
         
     ;;
 esac
+cp $PATH_PWD/rpi-fbcp/fbcp.service /lib/systemd/system/
 
 
 
