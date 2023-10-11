@@ -138,8 +138,11 @@ set_rotate() {
         exit 1
     fi
     
+    if [ -d "/etc/X11/xorg.conf.d/" ]; then
+        cp -rf "${PATH_CONF}/calibration.conf-${TFT_NAME}-${OPT_operate}"  /etc/X11/xorg.conf.d/99-calibration.conf
+    fi
+    
     _dtb_replace "rotate" $OPT_operate
-    cp -rf "${PATH_CONF}/calibration.conf-${TFT_NAME}-${OPT_operate}"  /etc/X11/xorg.conf.d/99-calibration.conf
     
     if systemctl --quiet is-enabled fbcp.service
     then
