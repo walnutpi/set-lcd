@@ -31,39 +31,40 @@ case $VERSION_digit in
     ;;
 esac
 
-sudo apt-get update
-sudo apt-get install  cmake -y
+
 
 # 树莓派要安装kernel-headers
 if [[ -f /proc/device-tree/model ]]; then
     Board_model=$(cat "/proc/device-tree/model")
     if [[ ${Board_model} == "Raspberry" ]]; then
-            echo_blue "Start to install the raspberrypi-kernel-headers"
-            apt install raspberrypi-kernel-headers xserver-xorg-input-evdev
-            
-            if [[ -f /usr/lib/modules/$(uname -r)//build/Makefile ]]; then
-                echo_green "[OK]\t kernel-headers has been installed"
-            else
-                echo_red "\n\nERROR: can not find kernel-headers \n\n"
-            fi
-            
-            # 编译安装驱动
-            echo_blue "Start to compile driver source code"
-            make -C drivers/
-            make -C drivers/ output
-            echo_green "[OK]\t drivers are ready"
-            
-            # 安装fbcp
-            echo_blue "Start to compile the rpi-fbcp"
-            if [[ ! -d $PATH_PWD/rpi-fbcp/build ]]; then
-                mkdir $PATH_PWD/rpi-fbcp/build
-            fi
-            cd $PATH_PWD/rpi-fbcp/build/
-            cmake ..
-            make
-            install fbcp /usr/local/bin/fbcp
-            echo_green "[OK]\t rpi-fbcp is ready"
-            cd $PATH_PWD
+        sudo apt-get update
+        sudo apt-get install  cmake -y
+        echo_blue "Start to install the raspberrypi-kernel-headers"
+        apt install raspberrypi-kernel-headers xserver-xorg-input-evdev
+        
+        if [[ -f /usr/lib/modules/$(uname -r)//build/Makefile ]]; then
+            echo_green "[OK]\t kernel-headers has been installed"
+        else
+            echo_red "\n\nERROR: can not find kernel-headers \n\n"
+        fi
+        
+        # 编译安装驱动
+        echo_blue "Start to compile driver source code"
+        make -C drivers/
+        make -C drivers/ output
+        echo_green "[OK]\t drivers are ready"
+        
+        # 安装fbcp
+        echo_blue "Start to compile the rpi-fbcp"
+        if [[ ! -d $PATH_PWD/rpi-fbcp/build ]]; then
+            mkdir $PATH_PWD/rpi-fbcp/build
+        fi
+        cd $PATH_PWD/rpi-fbcp/build/
+        cmake ..
+        make
+        install fbcp /usr/local/bin/fbcp
+        echo_green "[OK]\t rpi-fbcp is ready"
+        cd $PATH_PWD
     fi
 fi
 cp $PATH_PWD/rpi-fbcp/fbcp.service /lib/systemd/system/
