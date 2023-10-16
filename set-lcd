@@ -194,7 +194,12 @@ _remove_desktop() {
     fi
 }
 
+_run_set_device() {
+    set-device disable spidev1_0
+    set-device disable spidev1_1
+}
 install_only_fb() {
+    _run_set_device
     _remove_desktop
     _enable_modules
     _enable_dtbo
@@ -203,6 +208,7 @@ install_only_fb() {
 }
 
 install_desktop() {
+    _run_set_device
     _enable_modules
     _enable_dtbo
     
@@ -247,7 +253,7 @@ remove() {
 }
 
 if [[ $EUID -ne 0 ]]; then
-    echo -e "\n\tError:This script must be run as root!\n" 
+    echo -e "\n\tError:This script must be run as root!\n"
     exit 1
 fi
 

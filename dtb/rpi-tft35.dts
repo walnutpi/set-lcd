@@ -18,7 +18,7 @@
 				dc-gpios = <&gpio 24 0>;
 				reset-gpios = <&gpio 25 1>;
 
-				rotate = <90>;
+				rotate = <270>;
 				buswidth = <8>;
 				regwidth = <10>;
 				fps = <30>;
@@ -41,6 +41,20 @@
 		};
 	};
 	
+	fragment@1 {
+		target = <&spi0>;
 
+		__overlay__ {
+			status = "okay";
+
+			spidev@0 {
+				status = "disabled";
+			};
+
+			spidev@1 {
+				status = "disabled";
+			};
+		};
+	};
 
 };
