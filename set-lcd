@@ -12,8 +12,10 @@ fi
 
 
 set -e
-Board_model=$(cat "/proc/device-tree/model")
-
+Board_model="walnutpi-"
+if [[ -f /proc/device-tree/model ]]; then
+    Board_model=$(cat "/proc/device-tree/model")
+fi
 PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 PATH_CONF="${PATH_PWD}/conf"
 PATH_TFT="${PATH_PWD}/tft"
