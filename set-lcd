@@ -195,21 +195,27 @@ _remove_desktop() {
         rm -rf  $target_file
     fi
 }
+_try_command() {
+    set +e
+    "$@" >/dev/null 2>&1
+    set -e
+}
 
 _run_set_device() {
-    set-device disable spidev1_0
-    set-device disable spidev1_1
+    _try_command set-device disable spidev1_0
+    _try_command set-device disable spidev1_1
 }
-install_only_fb() {
-    _run_set_device
-    _remove_desktop
-    _enable_modules
-    _enable_dtbo
-    set_rotate 270
+# install_only_fb() {
+#     _run_set_device
+#     _remove_desktop
+#     _enable_modules
+#     _enable_dtbo
+#     set_rotate 270
     
-}
+# }
 
-install_desktop() {
+# install_desktop() {
+install() {
     _run_set_device
     _enable_modules
     _enable_dtbo

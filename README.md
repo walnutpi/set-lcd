@@ -38,14 +38,9 @@ set-lcd [lcd-name] [function] [value]
 在树莓派上：无论插不插hdmi，都会把桌面显示到lcd屏。重启后生效
 
 ```
-sudo set-lcd lcd35-st7796 install_desktop
+sudo set-lcd lcd35-st7796 install
 ```
 
-## 仅启用lcd屏，不做桌面
-适用于不想让桌面占用lcd屏，想自己控制lcd屏显示其他内容。可以使用/dev/fb节点来操作屏幕。重启后生效
-```
-sudo set-lcd lcd35-st7796 install_only_fb
-```
 
 ## 旋转lcd方向
 从驱动层面对lcd的方向进行旋转。重启后生效
