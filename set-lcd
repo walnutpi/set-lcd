@@ -205,21 +205,25 @@ _run_set_device() {
     _try_command set-device disable spidev1_0
     _try_command set-device disable spidev1_1
 }
-# install_only_fb() {
-#     _run_set_device
-#     _remove_desktop
-#     _enable_modules
-#     _enable_dtbo
-#     set_rotate 270
-    
-# }
 
-# install_desktop() {
+
+release_file="/etc/WalnutPi-release"
+
+    
+
+_add_flag() {
+    _try_command echo "lcd=enable" >> $release_file
+}
+
+_delete_flag() {
+    _try_command sed -i '/lcd=enable/d' $release_file
+}
+
 install() {
     _run_set_device
     _enable_modules
     _enable_dtbo
-    
+    _add_flag
     target_path="/usr/share/X11/xorg.conf.d/"
     
     case $Board_model in
@@ -250,6 +254,7 @@ install() {
     
     set_rotate 270
     
+    
 }
 
 
@@ -257,7 +262,7 @@ remove() {
     _disable_modules
     _disable_dtbo
     _remove_desktop
-    
+    _delete_flag
 }
 
 if [[ $EUID -ne 0 ]]; then
