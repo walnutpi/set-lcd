@@ -197,7 +197,7 @@ _remove_desktop() {
 }
 _try_command() {
     set +e
-    "$@" >/dev/null 2>&1
+    "$@"
     set -e
 }
 
@@ -216,7 +216,7 @@ _add_flag() {
 }
 
 _delete_flag() {
-    _try_command sed -i '/lcd=enable/d' $release_file
+    sed -i '/lcd=enable/d' $release_file
 }
 
 install() {
