@@ -1,27 +1,24 @@
-obj-m :=  fb_st7796.o
-
 VERSION=$(shell uname -r)
-VERSION_digit=$(shell echo $(VERSION) | cut -c 1)
+VERSION_DIGIT=$(shell echo $(VERSION) | cut -c 1)
+
+EXTRA_CFLAGS=-DVERSION_DIGIT=$(VERSION_DIGIT)
+
+obj-m :=  wpi_fb_st7796.o
 
 # KERNEL_PATH := /usr/lib/modules/6.1.21+/build/
 KERNEL_PATH := /usr/lib/modules/$(VERSION)/build/
 
 PWD := $(shell pwd)
 
-
-
 all:
-	make -C $(KERNEL_PATH) M=$(PWD) modules
-	make -C $(VERSION_digit)/
+	make -C $(KERNEL_PATH) M=$(PWD) modules EXTRA_CFLAGS=$(EXTRA_CFLAGS)
+	make -C $(VERSION_DIGIT)/
 
 clean:
 	make -C $(KERNEL_PATH) M=$(PWD) clean
-	make -C $(VERSION_digit)/ clean
+	make -C $(VERSION_DIGIT)/ clean
 
 output:
-	make -C $(VERSION_digit)/ output
-	-rm  /lib/modules/$(VERSION)/kernel/drivers/staging/fbtft/fbtft*
-	cp fbtft.ko /lib/modules/$(VERSION)/kernel/drivers/staging/fbtft/
-	-rm  /lib/modules/$(VERSION)/kernel/drivers/staging/fbtft/fb_st7796*
-	cp fb_st7796.ko /lib/modules/$(VERSION)/kernel/drivers/staging/fbtft/
-	depmod -a
+	make -C $(VERSION_DIGIT)/ output
+	mkdir -p ../drivers-save/$(VERSION)/walnutpi-tft/
+	cp *.ko ../drivers-save/$(VERSION)/walnutpi-tft/

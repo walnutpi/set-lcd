@@ -17,10 +17,14 @@
 #include <linux/delay.h>
 #include <video/mipi_display.h>
 
-#include "6/fbtft.h"
-// #include "fbtft.h"
 
-#define DRVNAME "fb_st7796"
+#if VERSION_DIGIT == 5
+#include "5/fbtft.h"
+#elif VERSION_DIGIT == 6
+#include "6/fbtft.h"
+#endif
+
+#define DRVNAME "wpi_fb_st7796"
 #define WIDTH 320
 #define HEIGHT 480
 #define TXBUFLEN (8 * PAGE_SIZE)
@@ -107,7 +111,7 @@ static struct fbtft_display display = {
     },
 };
 
-FBTFT_REGISTER_DRIVER(DRVNAME, "sitronix,st7796", &display);
+FBTFT_REGISTER_DRIVER(DRVNAME, "walnutpi,lcd35_st7796", &display);
 
 MODULE_ALIAS("spi:" DRVNAME);
 MODULE_ALIAS("platform:" DRVNAME);

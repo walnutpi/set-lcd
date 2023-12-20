@@ -11,7 +11,7 @@
    			#size-cells = <0>;
 			status = "okay";
 			lcd@0{
-				compatible = "sitronix,st7796";
+				compatible = "walnutpi,lcd35_st7796";
 				reg = <0>;
 				spi-max-frequency = <70000000>;
 				status = "okay";

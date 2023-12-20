@@ -1,8 +1,6 @@
+TFT_DTS_NAME=tft35
+TFT_MODULE=( "wpi_fbtft" "wpi_fb_st7796" "ads7846" )
 
-
-dtb_name=tft35
-module_tft=fb_st7796
-module_touch=ads7846
 TFT_WIDTH=320
 TFT_HIGHT=480
 

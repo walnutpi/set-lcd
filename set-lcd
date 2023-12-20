@@ -12,103 +12,77 @@ fi
 
 
 set -e
-Board_model="walnutpi-"
-if [[ -f /proc/device-tree/model ]]; then
-    Board_model=$(cat "/proc/device-tree/model")
-fi
+
 PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 PATH_CONF="${PATH_PWD}/conf"
 PATH_TFT="${PATH_PWD}/tft"
 PATH_DTB="${PATH_PWD}/dtb"
-
+PATH_DRIVER="${PATH_PWD}/drivers"
+PATH_DRIVER_SAVE="${PATH_PWD}/drivers-save/$(uname -r)"
+source ${PATH_PWD}/common.sh
 
 TFT_NAME=$1
-OPT_TFT_SETTING="${PATH_TFT}/${TFT_NAME}"
-source $OPT_TFT_SETTING
+source ${PATH_TFT}/${TFT_NAME}
 
-_file_insert() {
-    if ! grep -q "^$2" "$1"; then
-        echo "$2" >> "$1"
-    fi
-}
-_file_delete() {
-    if grep -q "^$2" "$1"; then
-        sed -i "/$2/d" $1
-    fi
-}
+Board_model="walnutpi-"
+if [[ -f /proc/device-tree/model ]]; then
+    Board_model=$(cat "/proc/device-tree/model")
+fi
 
-# 判断config.txt里有没有以参数1开头的行
-# 如果有则把后续部分替换为参数2
-# 如果没有则插入一行以参数1和2拼接的字符串，
-_config_insert() {
-    local key="$1"
-    local value="$2"
-    local file="/boot/config.txt"
-    if grep -q "^$key" "$file"; then
-        sudo sed -i "/^$key/c\\$key$value" "$file"
-    else
-        echo "$key$value" | sudo tee -a "$file"
-    fi
-}
+
 
 _enable_modules() {
+    if [ ! -d $PATH_DRIVER_SAVE ]; then
+        echo "compile drivers"
+        make -C drivers/
+        make -C drivers/ output
+    fi
+    cp -r $PATH_DRIVER_SAVE/* /lib/modules/$(uname -r)/kernel/drivers/
+    
+    echo -e "\nupdate system drivers...."
+    depmod
+    
     modules_file="/etc/modules"
-    _file_insert $modules_file "fbtft"
-    _file_insert $modules_file ${module_tft}
-    _file_insert $modules_file ${module_touch}
+    for module in ${TFT_MODULE[@]}
+    do
+        _file_insert $modules_file $module
+    done
 }
 _disable_modules() {
     modules_file="/etc/modules"
-    _file_delete $modules_file "fbtft"
-    _file_delete $modules_file ${module_tft}
-    _file_delete $modules_file ${module_touch}
-    
+    for module in ${TFT_MODULE[@]}
+    do
+        _file_delete $modules_file $module
+    done
 }
 
 _enable_dtbo() {
     config_file="/boot/config.txt"
-    case $Board_model in
-        Raspberry*)
-            dt_str="dtoverlay=rpi-${dtb_name}"
-            _file_insert $config_file $dt_str
-            
-        ;;
-        walnutpi*)
-            if grep -q "^overlays=" "$config_file"; then
-                if ! grep -q "^overlays=.*${dtb_name}" "$config_file"; then
-                    sed -i "s/^overlays=/&${dtb_name} /" "$config_file"
-                fi
-            else
-                echo "overlays=${dtb_name}" >> "$config_file"
-            fi
-        ;;
-    esac
+
+    if grep -q "^overlays=" "$config_file"; then
+        if ! grep -q "^overlays=.*${TFT_DTS_NAME}" "$config_file"; then
+            sed -i "s/^overlays=/&${TFT_DTS_NAME} /" "$config_file"
+        fi
+    else
+        echo "overlays=${TFT_DTS_NAME}" >> "$config_file"
+    fi
 }
 _disable_dtbo() {
     config_file="/boot/config.txt"
-    case $Board_model in
-        Raspberry*)
-            dt_str="dtoverlay=rpi-${dtb_name}"
-            _file_delete $config_file $dt_str
-        ;;
-        walnutpi*)
-            sed -i "/^overlays=/ s/${dtb_name}//g" "$config_file"
-        ;;
-    esac
+    sed -i "/^overlays=/ s/${TFT_DTS_NAME}//g" "$config_file"
 }
 
 # 更新设备树文件
 _updoad_dtbo() {
-    _enable_modules
     
-    dts_files=$(find "$PATH_DTB" -type f -name "*${dtb_name}.dts")
+    dts_files=$(find "$PATH_DTB" -type f -name "*${TFT_DTS_NAME}.dts")
     for dts_file in $dts_files; do
         dtbo_file="${dts_file%.dts}.dtbo"
         dtc -@  -I dts -O dtb -o "$dtbo_file" "$dts_file"
     done
     
     overlays_folder="/boot/overlays"
-    dtb_files=$(find "$PATH_DTB" -type f -name "*${dtb_name}.dtbo")
+    dtb_files=$(find "$PATH_DTB" -type f -name "*${TFT_DTS_NAME}.dtbo")
     for file in $dtb_files; do
         cp "$file" "$overlays_folder"
     done
@@ -122,7 +96,7 @@ _dtb_replace() {
     local searchString="$name = <[0-9]*>"
     local replaceString="$name = <$value>"
     
-    dts_files=$(find "$PATH_DTB" -type f -name "*${dtb_name}.dts")
+    dts_files=$(find "$PATH_DTB" -type f -name "*${TFT_DTS_NAME}.dts")
     for dts_file in $dts_files; do
         dtbo_file="${dts_file%.dts}.dtbo"
         sed -i "s/$searchString/$replaceString/g" $dts_file
@@ -167,39 +141,16 @@ set_rotate() {
 
 
 _remove_desktop() {
-    
-    case $Board_model in
-        Raspberry*)
-            config_file="/boot/config.txt"
-            
-            _file_delete $config_file "hdmi_force_hotplug=1"
-            _file_delete $config_file "hdmi_mode=87"
-            _file_delete $config_file "hdmi_group=2"
-            _file_delete $config_file "hdmi_drive=2"
-            _file_delete $config_file "hdmi_cvt $TFT_WIDTH $TFT_HIGHT 60 6 0 0 0"
-            _file_delete $config_file "hdmi_cvt $TFT_HIGHT $TFT_WIDTH 60 6 0 0 0"
-            _file_insert $config_file "dtoverlay=vc4-kms-v3d"
-            systemctl disable fbcp.service
-        ;;
-        walnutpi*)
-            target_file="/usr/share/X11/xorg.conf.d/99-fbdev.conf"
-            if [ -f "$target_file" ]; then
-                rm -rf  $target_file
-            fi
-            
-            
-        ;;
-    esac
+    target_file="/usr/share/X11/xorg.conf.d/99-fbdev.conf"
+    if [ -f "$target_file" ]; then
+        rm -rf  $target_file
+    fi
     target_file="/usr/share/X11/xorg.conf.d/45-evdev.conf"
     if [ -f "$target_file" ]; then
         rm -rf  $target_file
     fi
 }
-_try_command() {
-    set +e
-    "$@"
-    set -e
-}
+
 
 _run_set_device() {
     _try_command set-device disable spidev1_0
@@ -207,54 +158,22 @@ _run_set_device() {
 }
 
 
-release_file="/etc/WalnutPi-release"
-
-    
-
-_add_flag() {
-    _try_command echo "lcd=enable" >> $release_file
-}
-
-_delete_flag() {
-    sed -i '/lcd=enable/d' $release_file
-}
 
 install() {
     _run_set_device
     _enable_modules
     _enable_dtbo
     _add_flag
+    _updoad_dtbo
     target_path="/usr/share/X11/xorg.conf.d/"
     
-    case $Board_model in
-        Raspberry*)
-            echo "raspberry pi"
-            config_file="/boot/config.txt"
-            
-            _config_insert "hdmi_force_hotplug" "=1"
-            _config_insert "hdmi_group" "=2"
-            _config_insert "hdmi_mode" "=87"
-            _config_insert "hdmi_cvt" " $TFT_HIGHT $TFT_WIDTH 60 6 0 0 0"
-            _config_insert "hdmi_drive" "=2"
-            _file_delete $config_file "dtoverlay=vc4-kms-v3d"
-            
-            systemctl enable fbcp.service
-        ;;
-        walnutpi*)
-            if [ -d "$target_path" ]; then
-                cp ${PATH_CONF}/99-fbdev.conf $target_path
-            fi
-        ;;
-    esac
+    if [ -d "$target_path" ]; then
+        cp ${PATH_CONF}/99-fbdev.conf $target_path
+    fi
     
     if [ -d "$target_path" ]; then
         cp ${PATH_CONF}/10-evdev.conf $target_path/45-evdev.conf
     fi
-    # cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
-    
-    set_rotate 270
-    
-    
 }
 
 
@@ -266,9 +185,13 @@ remove() {
 }
 
 if [[ $EUID -ne 0 ]]; then
-    echo -e "\n\tError:This script must be run as root!\n"
+    echo -e "\n\tError:  please run as root!\n"
     exit 1
 fi
+
+
+
+
 
 FUNCTION_NAME=$2
 ARGUMENT=$3
