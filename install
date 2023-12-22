@@ -31,32 +31,32 @@ VERSION_digit=${VERSION:0:1}
 
 
 
-# # 树莓派要安装kernel-headers
-# if [[ -f /proc/device-tree/model ]]; then
-#     Board_model=$(cat "/proc/device-tree/model")
-#     if [[ ${Board_model} == "Raspberry" ]]; then
-#         sudo apt-get update
-#         sudo apt-get install  cmake -y
-#         echo_blue "Start to install the raspberrypi-kernel-headers"
-#         apt install raspberrypi-kernel-headers xserver-xorg-input-evdev
+# 树莓派要安装kernel-headers
+if [[ -f /proc/device-tree/model ]]; then
+    Board_model=$(cat "/proc/device-tree/model")
+    if [[ ${Board_model} == "Raspberry" ]]; then
+        sudo apt-get update
+        sudo apt-get install  cmake -y
+        echo_blue "Start to install the raspberrypi-kernel-headers"
+        apt install raspberrypi-kernel-headers xserver-xorg-input-evdev
         
-#         if [[ -f /usr/lib/modules/$(uname -r)//build/Makefile ]]; then
-#             echo_green "[OK]\t kernel-headers has been installed"
-#         else
-#             echo_red "\n\nERROR: can not find kernel-headers \n\n"
-#         fi
+        if [[ -f /usr/lib/modules/$(uname -r)//build/Makefile ]]; then
+            echo_green "[OK]\t kernel-headers has been installed"
+        else
+            echo_red "\n\nERROR: can not find kernel-headers \n\n"
+        fi
         
-#         # 编译安装驱动
-#         echo_blue "Start to compile driver source code"
-#         make -C drivers/
-#         make -C drivers/ output
-#         echo_green "[OK]\t drivers are ready"
-        
-        
-#     fi
-# fi
 
+        
+        
+    fi
+fi
 
+echo_blue "Start to compile driver source code"
+
+make -C ${PATH_PWD}/drivers/
+make -C ${PATH_PWD}/drivers/ output
+echo_green "[OK]\t drivers are ready"
 
 # 为系统添加set-lcd命令
 chmod +x $PATH_PWD/set-lcd

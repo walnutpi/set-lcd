@@ -10,19 +10,18 @@ if [ -z "$2" ]; then
     exit 1
 fi
 
+TFT_NAME=$1
 
-set -e
 
 PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-PATH_CONF="${PATH_PWD}/conf"
 PATH_TFT="${PATH_PWD}/tft"
+PATH_CONF="${PATH_TFT}/conf"
 PATH_DTB="${PATH_PWD}/dtb"
-PATH_DRIVER="${PATH_PWD}/drivers"
+PATH_DRIVER="${PATH_TFT}/drivers"
 PATH_DRIVER_SAVE="${PATH_PWD}/drivers-save/$(uname -r)"
-source ${PATH_PWD}/common.sh
 
-TFT_NAME=$1
-source ${PATH_TFT}/${TFT_NAME}
+source ${PATH_PWD}/common.sh
+source ${PATH_TFT}/${TFT_NAME}/tft
 
 Board_model="walnutpi-"
 if [[ -f /proc/device-tree/model ]]; then
@@ -30,12 +29,13 @@ if [[ -f /proc/device-tree/model ]]; then
 fi
 
 
+set -e
 
 _enable_modules() {
     if [ ! -d $PATH_DRIVER_SAVE ]; then
         echo "compile drivers"
-        make -C drivers/
-        make -C drivers/ output
+        make -C ${PATH_PWD}/drivers/
+        make -C ${PATH_PWD}/drivers/ output
     fi
     cp -r $PATH_DRIVER_SAVE/* /lib/modules/$(uname -r)/kernel/drivers/
     
