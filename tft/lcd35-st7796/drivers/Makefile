@@ -20,5 +20,5 @@ clean:
 
 output:
 	make -C $(VERSION_DIGIT)/ output
-	mkdir -p ../drivers-save/$(VERSION)/walnutpi-tft/
-	cp *.ko ../drivers-save/$(VERSION)/walnutpi-tft/
+	mkdir -p ../drivers-save/$(VERSION)/
+	cp *.ko ../drivers-save/$(VERSION)/

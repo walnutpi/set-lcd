@@ -52,12 +52,6 @@ if [[ -f /proc/device-tree/model ]]; then
     fi
 fi
 
-echo_blue "Start to compile driver source code"
-
-make -C ${PATH_PWD}/drivers/
-make -C ${PATH_PWD}/drivers/ output
-echo_green "[OK]\t drivers are ready"
-
 # 为系统添加set-lcd命令
 chmod +x $PATH_PWD/set-lcd
 bin_path="/usr/bin/set-lcd"
