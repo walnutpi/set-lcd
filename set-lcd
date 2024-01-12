@@ -26,7 +26,7 @@ source ${PATH_TFT}/tft
 
 Board_model="walnutpi-"
 if [[ -f /proc/device-tree/model ]]; then
-    Board_model=$(cat "/proc/device-tree/model")
+    Board_model=$(tr -d '\0' < /proc/device-tree/model)
 fi
 
 
@@ -124,17 +124,6 @@ set_rotate() {
     
     _dtb_replace "rotate" $OPT_operate
     
-    # if systemctl --quiet is-enabled fbcp.service
-    # then
-    #     case "$1" in
-    #         0|180)
-    #             _config_insert "hdmi_cvt" " $TFT_WIDTH $TFT_HIGHT 60 6 0 0 0"
-    #         ;;
-    #         90|270)
-    #             _config_insert "hdmi_cvt" " $TFT_HIGHT $TFT_WIDTH 60 6 0 0 0"
-    #         ;;
-    #     esac
-    # fi
     _updoad_dtbo
 }
 
