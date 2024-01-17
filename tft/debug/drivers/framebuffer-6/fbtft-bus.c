@@ -134,31 +134,59 @@ int fbtft_write_vmem16_bus8(struct fbtft_par *par, size_t offset, size_t len)
 	size_t to_copy;
 	size_t tx_array_size;
 	int i;
+	int j;
 	int ret = 0;
 	size_t startbyte_size = 0;
 
 	u16 *transfer_area;
 
-
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s(offset=%zu, len=%zu)\n",
 				  __func__, offset, len);
 	vmem16 = (u16 *)(par->info->screen_buffer + offset);
+	remain = len / 2;
 
 	transfer_area = kmalloc(len, GFP_KERNEL);
+
+	// // 单循环复制全部
 	// for(int i=0; i<len/2; i++)
-	// 		*(transfer_area + len) = *(vmem16 + len);
-	
-	// for (int i=0; i< len/480/2; i++)
-	// {
-	// 	for(int j =0; j< 480/2; j++)
-	// 	{
-	// 		*(transfer_area + i* 480/2 + j) = *(vmem16 + i*480/2 + j);
-	// 		// *(transfer_area + i* 480/2 + j) = *(vmem16 + i*2*480 + j*2);
-	// 	}
-	// }
-		remain = len / 2 ;
-		// remain = len / 2;
-	// vmem16 = transfer_area;
+	// 		*(transfer_area + i) = *(vmem16 + i );
+
+	// // 双循环复制全部
+	// for(int i=0; i<len/2/480; i++)
+	// 	for(int j =0; j< 480; j++)
+	// 		*(transfer_area + i*480+j) = *(vmem16 + i*480 +j);
+
+	// // 双循环，x减半
+	// for(int i=0; i<=len/2/480; i++)
+	// 	for(int j =0; j<= 240; j++)
+	// 		*(transfer_area + i*240+j) = *(vmem16 + i*480 +j*2);
+	// remain /= 2;
+
+	// xy减半
+	// int i = 0;
+	u16 *p;
+	u16 *p_mem;
+	p = transfer_area;
+	p_mem = vmem16;
+	for (i = 0; i < len / 2 / 480 / 2; i += 2)
+	{
+
+		for (j = 0; j < 240; j++)
+		{
+			*p = *p_mem;
+			p++;
+			p_mem += 2;
+		}
+		p_mem += 480;
+	}
+	remain /= 4;
+
+	printk("len=%ld i=%d,j=%d\r\n", len, i, j);
+	printk("i * 240 + j = %d\r\n", i * 240 + j);
+	printk("remain=%d\r\n", remain);
+
+	vmem16 = transfer_area;
+
 	gpiod_set_value(par->gpio.dc, 1);
 
 	/* non buffered write */

@@ -13,14 +13,12 @@
 			lcd@0{
 				compatible = "walnutpi,lcd145_st7789";
 				reg = <0>;
-				spi-max-frequency = <30000000>;
+				spi-max-frequency = <10000000>;
 				status = "okay";
 
 				dc-gpios = <&pio  2 14 0>; /* PC14  GPIO_ACTIVE_HIGH*/
 				reset-gpios = <&pio 2 15 1>; /* PC15  GPIO_ACTIVE_LOW */
-				width = <240>;
-				hight = <240>;
-				rotate = <270>;
+				rotate = <90>;
 				buswidth = <8>;
 				regwidth = <8>;
 				fps = <30>;

@@ -70,11 +70,11 @@ static int init_display(struct fbtft_par *par)
 
 static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye)
 {
-    // printk("xs=%d\t ys=%d\t xe=%d\t ye=%d\r\n", xs, ys, xe, ye);
-    // xs /=2 ;
-    // ys /=2 ;
-    // xe /=2 ;
-    // ye /=2 ;
+    printk("原始:xs=%d\t ys=%d\t xe=%d\t ye=%d\r\n", xs, ys, xe, ye);
+    xs /=2 ;
+    ys /=2 ;
+    xe /=2 ;
+    ye /=2 ;
     switch (par->info->var.rotate)
     {
     case 0:
@@ -91,6 +91,7 @@ static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye)
         xe += 80;
         break;
     }
+    printk("修正:xs=%d\t ys=%d\t xe=%d\t ye=%d\n\r\n", xs, ys, xe, ye);
 
     write_reg(par, 0x2a, (xs >> 8) & 0xFF, xs & 0xFF, (xe >> 8) & 0xFF, xe & 0xFF);
     write_reg(par, 0x2b, (ys >> 8) & 0xFF, ys & 0xFF, (ye >> 8) & 0xFF, ye & 0xFF);
