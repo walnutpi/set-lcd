@@ -24,8 +24,8 @@
 // #endif
 
 #define DRVNAME "wpi_fb_st7789"
-#define WIDTH 240
-#define HEIGHT 240
+#define WIDTH 480
+#define HEIGHT 480
 
 #define TXBUFLEN (8 * PAGE_SIZE)
 
@@ -34,123 +34,66 @@ static int init_display(struct fbtft_par *par)
     par->fbtftops.reset(par);
     mdelay(120);
 
-    // /* startup sequence for MI0283QT-9A */
-    // write_reg(par, MIPI_DCS_SOFT_RESET);
-    // mdelay(10);
-    // write_reg(par, MIPI_DCS_SET_DISPLAY_OFF);
-
-    // /* ------------power control-------------------------------- */
-    // write_reg(par, 0xC0, 0x0c, 0x02);
-    // write_reg(par, 0xC1, 0x44);
-    // /* ------------VCOM --------- */
-    // write_reg(par, 0xC5, 0x00, 0x16, 0x80);
-    // write_reg(par, 0x36, 0x28);
-
-    // write_reg(par, 0x3a, 0x55); // Interface Mode Control
-    // write_reg(par, 0xB0, 0x00); // Interface Mode Control
-
-    // /* ------------frame rate----------------------------------- */
-    // write_reg(par, 0xB1, 0xB0); // 70HZ
-
-    // write_reg(par, 0xB4, 0x02);
-    // write_reg(par, 0xB6, 0x02, 0x02); // RGB/MCU Interface Control
-    // write_reg(par, 0xE9, 0x00);
-    // write_reg(par, 0xF7, 0xA9, 0x51, 0x2C, 0x82);
-
-    // write_reg(par, 0x11);
-    // mdelay(120);
-    // write_reg(par, 0x29);
-    // mdelay(20);
-
-    // write_reg(par, 0x11);
-
-
-
-
-
     write_reg(par, 0x11);
     write_reg(par, 0x11);
     mdelay(120);
 
     write_reg(par, 0x36, 0);
 
-    // write_reg(par, 0x3a, 0x65);
+    write_reg(par, 0x3a, 0x05);
+    write_reg(par, 0x21);
+    write_reg(par, 0x2a, 0x00, 0x00, 0x00, 0xef);
+    write_reg(par, 0x2b, 0x00, 0x00, 0x00, 0xef);
+    //--------------------------------ST7789V Frame rate setting----------------------------------//
+    write_reg(par, 0xb2, 0x0c, 0x0c, 0x00, 0x33, 0x33);
+    write_reg(par, 0xb7, 0x35);
+    //---------------------------------ST7789V Power setting--------------------------------------//
+    write_reg(par, 0xbb, 0x1f);
+    write_reg(par, 0xc0, 0x2c);
+    write_reg(par, 0xc2, 0x01);
+    write_reg(par, 0xc3, 0x12);
+    write_reg(par, 0xc4, 0x20);
+    write_reg(par, 0xc6, 0x0f);
+    write_reg(par, 0xd0, 0xa4, 0xa1);
+    //--------------------------------ST7789V gamma setting--------------------------------------//
+    write_reg(par, 0xe0, 0xd0, 0x08, 0x11, 0x08, 0x0c, 0x15, 0x39, 0x33, 0x50, 0x36, 0x13, 0x14, 0x29, 0x2d);
+    write_reg(par, 0xe1, 0xd0, 0x08, 0x10, 0x08, 0x06, 0x06, 0x39, 0x44, 0x51, 0x0b, 0x16, 0x14, 0x2f, 0x31);
 
-    // write_reg(par, 0x21);
-    // write_reg(par, 0x2a, 0x00, 0x00, 0x00, 0xef);
-    // write_reg(par, 0x2b, 0x00, 0x00, 0x00, 0xef);
-    // write_reg(par, 0x2c);
+    write_reg(par, 0x2A, 0x00, 0x00, 0x00, 0xEF); // 239
 
-    // //--------------------------------ST7789V Frame rate setting----------------------------------//
-    // write_reg(par, 0xb2, 0x0c, 0x0c, 0x00, 0x33, 0x33);
-    // write_reg(par, 0xb7, 0x35);
-    // //---------------------------------ST7789V Power setting--------------------------------------//
-    // write_reg(par, 0xbb, 0x1f);
-    // write_reg(par, 0xc0, 0x2c);
-    // write_reg(par, 0xc2, 0x01);
-    // write_reg(par, 0xc3, 0x12);
-    // write_reg(par, 0xc4, 0x20);
-    // write_reg(par, 0xc6, 0x0f);
-    // write_reg(par, 0xd0, 0xa4, 0xa1);
-    // //--------------------------------ST7789V gamma setting--------------------------------------//
-    // write_reg(par, 0xe0, 0xd0, 0x08, 0x11, 0x08, 0x0c, 0x15, 0x39, 0x33, 0x50, 0x36, 0x13, 0x14, 0x29, 0x2d);
-    // write_reg(par, 0xe1, 0xd0, 0x08, 0x10, 0x08, 0x06, 0x06, 0x39, 0x44, 0x51, 0x0b, 0x16, 0x14, 0x2f, 0x31);
-    // write_reg(par, 0x29);
-    // mdelay(120);
+    write_reg(par, 0x2B, 0x00, 0x00, 0x00, 0xEF); // 239
 
-write_reg(par, 0x3a, 0x05);
-write_reg(par, 0x21);
-write_reg(par, 0x2a, 0x00, 0x00, 0x00, 0xef);
-write_reg(par, 0x2b, 0x00, 0x00, 0x00, 0xef);
-//--------------------------------ST7789V Frame rate setting----------------------------------//
-write_reg(par, 0xb2, 0x0c, 0x0c, 0x00, 0x33, 0x33);
-write_reg(par, 0xb7, 0x35);
-//---------------------------------ST7789V Power setting--------------------------------------//
-write_reg(par, 0xbb, 0x1f);
-write_reg(par, 0xc0, 0x2c);
-write_reg(par, 0xc2, 0x01);
-write_reg(par, 0xc3, 0x12);
-write_reg(par, 0xc4, 0x20);
-write_reg(par, 0xc6, 0x0f);
-write_reg(par, 0xd0, 0xa4, 0xa1);
-//--------------------------------ST7789V gamma setting--------------------------------------//
-write_reg(par, 0xe0, 0xd0, 0x08, 0x11, 0x08, 0x0c, 0x15, 0x39, 0x33, 0x50, 0x36, 0x13, 0x14, 0x29, 0x2d);
-write_reg(par, 0xe1, 0xd0, 0x08, 0x10, 0x08, 0x06, 0x06, 0x39, 0x44, 0x51, 0x0b, 0x16, 0x14, 0x2f, 0x31);
-
-write_reg(par, 0x2A, 0x00, 0x00, 0x00, 0xEF); //239
-
-write_reg(par, 0x2B, 0x00, 0x00, 0x00, 0xEF); //239
-
-write_reg(par, 0x29);	//Display on	
+    write_reg(par, 0x29); // Display on
 
     return 0;
 }
 
 static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye)
 {
-
-
-        switch (par->info->var.rotate)
+    // printk("xs=%d\t ys=%d\t xe=%d\t ye=%d\r\n", xs, ys, xe, ye);
+    // xs /=2 ;
+    // ys /=2 ;
+    // xe /=2 ;
+    // ye /=2 ;
+    switch (par->info->var.rotate)
     {
     case 0:
         break;
 
     case 180:
-        ys+=80;
-        ye+=80;
+        ys += 80;
+        ye += 80;
         break;
     case 90:
         break;
     case 270:
-        xs+=80;
-        xe+=80;
+        xs += 80;
+        xe += 80;
         break;
     }
 
     write_reg(par, 0x2a, (xs >> 8) & 0xFF, xs & 0xFF, (xe >> 8) & 0xFF, xe & 0xFF);
     write_reg(par, 0x2b, (ys >> 8) & 0xFF, ys & 0xFF, (ye >> 8) & 0xFF, ye & 0xFF);
-
-
 
     write_reg(par, 0x2c);
 }
@@ -159,7 +102,7 @@ static int set_var(struct fbtft_par *par)
 {
     switch (par->info->var.rotate)
     {
-        
+
     case 0:
         write_reg(par, 0x36, 0);
         break;
@@ -195,9 +138,9 @@ FBTFT_REGISTER_DRIVER(DRVNAME, "walnutpi,lcd145_st7789", &display);
 
 MODULE_ALIAS("spi:" DRVNAME);
 MODULE_ALIAS("platform:" DRVNAME);
-MODULE_ALIAS("spi:st7796");
-MODULE_ALIAS("platform:st7796");
+MODULE_ALIAS("spi:st7789");
+MODULE_ALIAS("platform:st7789");
 
-MODULE_DESCRIPTION("FB driver for the st7796 LCD display controller");
+MODULE_DESCRIPTION("FB driver for the st7789 LCD display controller");
 MODULE_AUTHOR("lodge");
 MODULE_LICENSE("GPL");
