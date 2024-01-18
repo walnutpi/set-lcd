@@ -20,7 +20,7 @@
 				reset-gpios = <&pio 2 15 1>; /* PC15  GPIO_ACTIVE_LOW */
 				width = <240>;
 				hight = <240>;
-				rotate = <270>;
+				rotate = <180>;
 				buswidth = <8>;
 				regwidth = <8>;
 				fps = <30>;
