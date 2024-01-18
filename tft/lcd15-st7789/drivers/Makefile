@@ -3,7 +3,7 @@ VERSION_DIGIT=$(shell echo $(VERSION) | cut -c 1)
 
 EXTRA_CFLAGS=-DVERSION_DIGIT=$(VERSION_DIGIT)
 
-obj-m :=  wpi_fb_st7796.o
+obj-m :=  wpi_fb_st7789_15.o
 
 # KERNEL_PATH := /usr/lib/modules/6.1.21+/build/
 KERNEL_PATH := /usr/lib/modules/$(VERSION)/build/

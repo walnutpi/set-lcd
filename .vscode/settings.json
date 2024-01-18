@@ -4,6 +4,10 @@
         "mman.h": "c",
         "ioctl.h": "c",
         "fcntl.h": "c",
-        "init.h": "c"
+        "init.h": "c",
+        "fbtft.h": "c",
+        "timex.h": "c",
+        "stdint.h": "c",
+        "types.h": "c"
     }
 }

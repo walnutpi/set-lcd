@@ -19,14 +19,15 @@
 
 
 #if VERSION_DIGIT == 5
-#include "5/fbtft.h"
+#include "framebuffer-5/fbtft.h"
 #elif VERSION_DIGIT == 6
-#include "6/fbtft.h"
+#include "framebuffer-6/fbtft.h"
 #endif
 
 #define DRVNAME "wpi_fb_st7796"
 #define WIDTH 320
 #define HEIGHT 480
+
 #define TXBUFLEN (8 * PAGE_SIZE)
 
 static int init_display(struct fbtft_par *par)

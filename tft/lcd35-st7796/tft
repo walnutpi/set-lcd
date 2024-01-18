@@ -1,8 +1,7 @@
 TFT_DTS_NAME=tft35
 TFT_MODULE=( "wpi_fbtft" "wpi_fb_st7796" "ads7846" )
 
-TFT_WIDTH=320
-TFT_HIGHT=480
+USE_CONF_FILE=( "45-evdev.conf" "99-fbdev.conf" )
 
 help_str=" \
 01studio \

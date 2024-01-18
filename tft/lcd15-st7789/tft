@@ -1,0 +1,3 @@
+TFT_DTS_NAME=tft15
+TFT_MODULE=( "wpi_fbtft"  "wpi_fb_st7789_15"  )
+USE_CONF_FILE=( "99-fbdev.conf" )
