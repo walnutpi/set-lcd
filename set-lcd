@@ -14,15 +14,18 @@ TFT_NAME=$1
 
 
 PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-PATH_TFT="${PATH_PWD}/tft/${TFT_NAME}"
+PATH_TFT="${PATH_PWD}/tft"
+PATH_NOW_TFT="${PATH_TFT}/${TFT_NAME}"
 
-PATH_CONF="${PATH_PWD}/conf"
-PATH_DTB="${PATH_TFT}/dtb"
-PATH_DRIVER="${PATH_TFT}/drivers"
-PATH_DRIVER_SAVE="${PATH_TFT}/drivers-save/$(uname -r)"
+PATH_CONF="${PATH_PWD}/xorg-conf"
+PATH_DTB="${PATH_NOW_TFT}/dtb"
+PATH_DRIVER="${PATH_NOW_TFT}/drivers"
+PATH_DRIVER_SAVE="${PATH_NOW_TFT}/drivers-save/$(uname -r)"
+PATH_calibration="${PATH_NOW_TFT}/xorg-calibration"
+
 
 source ${PATH_PWD}/common.sh
-source ${PATH_TFT}/tft
+source ${PATH_NOW_TFT}/tft
 
 Board_model="walnutpi-"
 if [[ -f /proc/device-tree/model ]]; then
@@ -117,8 +120,8 @@ set_rotate() {
     fi
     
     if [ -d "/etc/X11/xorg.conf.d/" ]; then
-        if [ -f  ${PATH_CONF}/calibration.conf-${OPT_operate} ]; then
-            cp -rf "${PATH_CONF}/calibration.conf-${OPT_operate}"  /etc/X11/xorg.conf.d/99-calibration.conf
+        if [ -f  ${PATH_calibration}/calibration.conf-${OPT_operate} ]; then
+            cp -rf "${PATH_calibration}/calibration.conf-${OPT_operate}"  /etc/X11/xorg.conf.d/99-calibration.conf
         fi
     fi
     
@@ -134,15 +137,15 @@ set_rotate() {
 
 
 _remove_desktop() {
-
+    
     target_path="/usr/share/X11/xorg.conf.d"
     if [ -d "$target_path" ]; then
         for conf_file in ${USE_CONF_FILE[@]};
         do
-        rm -rf  $target_path/${conf_file}
+            rm -rf  $target_path/${conf_file}
         done
     fi
-
+    
 }
 
 
@@ -151,9 +154,19 @@ _run_set_device() {
     _try_command set-device disable spidev1_1
 }
 
-
+_disable_other() {
+    cd $PATH_TFT
+    all=$(ls -d */ | sed 's#/##' )
+    for board in ${all[@]};
+    do
+        if [[ $board != $TFT_NAME ]];then
+            set-lcd $board remove |> /dev/zero
+        fi
+    done
+}
 
 install() {
+    _disable_other
     _run_set_device
     _enable_modules
     _enable_dtbo
@@ -167,9 +180,6 @@ install() {
             cp ${PATH_CONF}/${conf_file} $target_path
         done
     fi
-
-    
-    
     
     set_rotate 270
 }
