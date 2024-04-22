@@ -155,10 +155,11 @@ _run_set_device() {
 }
 
 _disable_other() {
-    cd $PATH_TFT
-    all=$(ls -d */ | sed 's#/##' )
-    for board in ${all[@]};
+    local all_board=$(ls -d $PATH_TFT/*/ | sed 's#/##' )
+    local board
+    for board in ${all_board[@]};
     do
+        board=$(basename $board)
         if [[ $board != $TFT_NAME ]];then
             set-lcd $board remove |> /dev/zero
         fi
