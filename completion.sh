@@ -5,9 +5,7 @@ _lcd_set () {
     if [ $COMP_CWORD -eq 1 ]; then
         local link_path=$(readlink -f /usr/bin/set-lcd)
         local dir_path=$(dirname $link_path)
-        cd $dir_path/tft/
-        local files=$(ls -d */ | sed 's#/##' )
-        # local files=$(ls $dir_path/tft)
+        local files=$(ls -d "$dir_path/tft/"*/ |  sed "s#$dir_path/tft/##"| sed 's#/##')
         COMPREPLY=($(compgen -W "$files" -- $cur))
     elif [ $COMP_CWORD -eq 2 ]; then
         local functions=$(grep -oP '^[^_]\w+\s*\(\)' /usr/bin/set-lcd | sed 's/()//')
