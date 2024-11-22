@@ -667,12 +667,6 @@ struct fb_info *fbtft_framebuffer_alloc(struct fbtft_display *display,
 	info->fix.accel =          FB_ACCEL_NONE;
 	info->fix.smem_len =       vmem_size;
 
-
-#if IS_ENABLED(CONFIG_FB_BACKLIGHT)
-    dev_info(dev,"被定义 \n");
-#else
-    dev_info(dev,"无定义 \n");
-#endif
 	fb_deferred_io_init(info);
 
 	info->var.rotate =         pdata->rotate;
