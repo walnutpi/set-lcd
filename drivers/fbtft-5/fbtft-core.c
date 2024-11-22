@@ -156,6 +156,7 @@ static int fbtft_backlight_get_brightness(struct backlight_device *bd)
 
 void fbtft_unregister_backlight(struct fbtft_par *par)
 {
+#if IS_ENABLED(CONFIG_FB_BACKLIGHT)
     if (par->info->bl_dev)
     {
         par->info->bl_dev->props.power = FB_BLANK_POWERDOWN;
@@ -163,6 +164,7 @@ void fbtft_unregister_backlight(struct fbtft_par *par)
         backlight_device_unregister(par->info->bl_dev);
         par->info->bl_dev = NULL;
     }
+#endif
 }
 EXPORT_SYMBOL(fbtft_unregister_backlight);
 
@@ -173,7 +175,9 @@ static const struct backlight_ops fbtft_bl_ops = {
 
 void fbtft_register_backlight(struct fbtft_par *par)
 {
+#if IS_ENABLED(CONFIG_FB_BACKLIGHT)
     struct backlight_device *bd;
+#endif
     struct backlight_properties bl_props = {
         0,
     };
@@ -191,6 +195,7 @@ void fbtft_register_backlight(struct fbtft_par *par)
     if (!gpiod_get_value(par->gpio.led[0]))
         par->polarity = true;
 
+#if IS_ENABLED(CONFIG_FB_BACKLIGHT)
     bd = backlight_device_register(dev_driver_string(par->info->device),
                                    par->info->device, par,
                                    &fbtft_bl_ops, &bl_props);
@@ -201,7 +206,9 @@ void fbtft_register_backlight(struct fbtft_par *par)
                 PTR_ERR(bd));
         return;
     }
+
     par->info->bl_dev = bd;
+#endif
 
     if (!par->fbtftops.unregister_backlight)
         par->fbtftops.unregister_backlight = fbtft_unregister_backlight;
@@ -876,12 +883,14 @@ int fbtft_register_framebuffer(struct fb_info *fb_info)
              fb_info->fix.smem_len >> 10, text1,
              HZ / fb_info->fbdefio->delay, text2);
 
+#if IS_ENABLED(CONFIG_FB_BACKLIGHT)
     /* Turn on backlight if available */
     if (fb_info->bl_dev)
     {
         fb_info->bl_dev->props.power = FB_BLANK_UNBLANK;
         fb_info->bl_dev->ops->update_status(fb_info->bl_dev);
     }
+#endif
 
     return 0;
 

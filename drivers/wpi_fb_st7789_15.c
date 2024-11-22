@@ -6,9 +6,9 @@
 #include <video/mipi_display.h>
 
 #if VERSION_DIGIT == 5
-#include "framebuffer-5/fbtft.h"
+#include "fbtft-5/fbtft.h"
 #elif VERSION_DIGIT == 6
-#include "framebuffer-6/fbtft.h"
+#include "fbtft-6/fbtft.h"
 #endif
 
 #define DRVNAME "wpi_fb_st7789_15"

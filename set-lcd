@@ -15,12 +15,12 @@ TFT_NAME=$1
 
 PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 PATH_TFT="${PATH_PWD}/tft"
+PATH_DRIVER="${PATH_PWD}/drivers"
+PATH_DRIVER_SAVE="${PATH_PWD}/drivers-save/$(uname -r)"
 PATH_NOW_TFT="${PATH_TFT}/${TFT_NAME}"
 
 PATH_CONF="${PATH_PWD}/xorg-conf"
 PATH_DTB="${PATH_NOW_TFT}/dtb"
-PATH_DRIVER="${PATH_NOW_TFT}/drivers"
-PATH_DRIVER_SAVE="${PATH_NOW_TFT}/drivers-save/$(uname -r)"
 PATH_calibration="${PATH_NOW_TFT}/xorg-calibration"
 
 
@@ -36,13 +36,10 @@ fi
 set -e
 
 _enable_modules() {
-    if [ ! -d $PATH_DRIVER_SAVE ]; then
-        echo "compile drivers"
-        make -C ${PATH_DRIVER}
-        make -C ${PATH_DRIVER} output
-        make -C ${PATH_DRIVER} clean
-    fi
-    cp -r $PATH_DRIVER_SAVE/* /lib/modules/$(uname -r)/kernel/drivers/
+    echo "compile drivers"
+    make -C ${PATH_DRIVER}
+    make -C ${PATH_DRIVER} output
+    cp  ${PATH_DRIVER}/*.ko /lib/modules/$(uname -r)/kernel/drivers/
     
     echo -e "\nupdate system drivers...."
     depmod
