@@ -16,7 +16,7 @@ TFT_NAME=$1
 PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 PATH_TFT="${PATH_PWD}/tft"
 PATH_DRIVER="${PATH_PWD}/drivers"
-PATH_DRIVER_SAVE="${PATH_PWD}/drivers-save/$(uname -r)"
+PATH_DRIVER_SAVE="/lib/modules/$(uname -r)/kernel/wpi-drivers/"
 PATH_NOW_TFT="${PATH_TFT}/${TFT_NAME}"
 
 PATH_CONF="${PATH_PWD}/xorg-conf"
@@ -38,8 +38,10 @@ set -e
 _enable_modules() {
     echo "compile drivers"
     make -C ${PATH_DRIVER}
-    make -C ${PATH_DRIVER} output
-    cp  ${PATH_DRIVER}/*.ko /lib/modules/$(uname -r)/kernel/drivers/
+    if [ ! -d $PATH_DRIVER_SAVE ]; then
+        mkdir $PATH_DRIVER_SAVE
+    fi
+    cp -r ${PATH_DRIVER}/* $PATH_DRIVER_SAVE
     
     echo -e "\nupdate system drivers...."
     depmod
