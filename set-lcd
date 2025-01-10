@@ -129,11 +129,6 @@ set_rotate() {
     _updoad_dtbo
 }
 
-# -h() {
-#     echo -e "${help_str}"
-# }
-
-
 
 _remove_desktop() {
     
