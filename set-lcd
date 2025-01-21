@@ -60,25 +60,9 @@ _disable_modules() {
     done
 }
 
-_enable_dtbo() {
-    config_file="/boot/config.txt"
-    
-    if grep -q "^overlays=" "$config_file"; then
-        if ! grep -q "^overlays=.*${TFT_DTS_NAME}" "$config_file"; then
-            sed -i "s/^overlays=/&${TFT_DTS_NAME} /" "$config_file"
-        fi
-    else
-        echo "overlays=${TFT_DTS_NAME}" >> "$config_file"
-    fi
-}
-_disable_dtbo() {
-    config_file="/boot/config.txt"
-    sed -i "/^overlays=/ s/${TFT_DTS_NAME}//g" "$config_file"
-}
 
 # 更新设备树文件
 _updoad_dtbo() {
-    
     dts_files=$(find "$PATH_DTB" -type f -name "*${TFT_DTS_NAME}.dts")
     for dts_file in $dts_files; do
         dtbo_file="${dts_file%.dts}.dtbo"
@@ -127,6 +111,7 @@ set_rotate() {
     _dtb_replace "rotate" $OPT_operate
     
     _updoad_dtbo
+    set-device
 }
 
 
@@ -164,9 +149,9 @@ install() {
     _disable_other
     _run_set_device
     _enable_modules
-    _enable_dtbo
-    _add_flag
     _updoad_dtbo
+    set-device enable $TFT_DTS_NAME
+    _add_flag
     target_path="/usr/share/X11/xorg.conf.d/"
     
     if [ -d "$target_path" ]; then
@@ -182,9 +167,9 @@ install() {
 
 remove() {
     _disable_modules
-    _disable_dtbo
     _remove_desktop
     _delete_flag
+    set-device disable $TFT_DTS_NAME
 }
 
 if [[ $EUID -ne 0 ]]; then
