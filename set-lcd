@@ -152,6 +152,13 @@ install() {
     _updoad_dtbo
     set-device enable $TFT_DTS_NAME
     _add_flag
+
+    # 判断文件/boot/config.txt中是否有一行是hdmi_force_hotplug=1 如果有则改为hdmi_force_hotplug=0
+    if grep -q "hdmi_force_hotplug=1" /boot/config.txt; then
+        sed -i 's/hdmi_force_hotplug=1/hdmi_force_hotplug=0/g' /boot/config.txt
+    fi
+    
+
     target_path="/usr/share/X11/xorg.conf.d/"
     
     if [ -d "$target_path" ]; then
@@ -170,6 +177,11 @@ remove() {
     _remove_desktop
     _delete_flag
     set-device disable $TFT_DTS_NAME
+    # 判断文件/boot/config.txt中是否有一行是#hdmi_force_hotplug=0 如果有则改为hdmi_force_hotplug=1
+    if grep -q "hdmi_force_hotplug=0" /boot/config.txt; then
+        sed -i 's/hdmi_force_hotplug=0/hdmi_force_hotplug=1/g' /boot/config.txt
+    fi
+
 }
 
 if [[ $EUID -ne 0 ]]; then
