@@ -1,3 +1,4 @@
+VERSION=$(shell uname -r)
+VERSION_DIGIT=$(shell echo $(VERSION) | cut -c 1)
 
-obj-m +=  ads7846.o
-
+obj-y += $(VERSION_DIGIT)/
