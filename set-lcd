@@ -38,9 +38,10 @@ set -e
 _enable_modules() {
     echo "compile drivers"
     make -C ${PATH_DRIVER}
-    if [ ! -d $PATH_DRIVER_SAVE ]; then
-        mkdir $PATH_DRIVER_SAVE
+    if [ -d $PATH_DRIVER_SAVE ]; then
+        rm -r $PATH_DRIVER_SAVE
     fi
+    mkdir -p $PATH_DRIVER_SAVE
     cp -r ${PATH_DRIVER}/* $PATH_DRIVER_SAVE
     
     echo -e "\nupdate system drivers...."
