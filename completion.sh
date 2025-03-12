@@ -1,5 +1,6 @@
 #!/bin/bash
-source /boot/config.txt
+
+source /boot/config.txt > /dev/null 2>&1
 
 # 判断是否保存了与overlay_prefix相同的设备树，有才允许该lcd的名称自动补全
 link_path=$(readlink -f /usr/bin/set-lcd)
