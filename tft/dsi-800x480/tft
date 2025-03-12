@@ -1,0 +1,3 @@
+TFT_DTS_NAME=dsi-800x400
+TFT_MODULE=(  )
+USE_CONF_FILE=(   )
