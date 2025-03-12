@@ -13,13 +13,11 @@ for dir in $(ls -d "$dir_path/tft/"*/); do
         done
     fi
 done
+
+
 _lcd_set () {
     local cur=${COMP_WORDS[COMP_CWORD]}
     if [ $COMP_CWORD -eq 1 ]; then
-
-
-       
-
         COMPREPLY=($(compgen -W "$files" -- $cur))
     elif [ $COMP_CWORD -eq 2 ]; then
         local functions=$(grep -oP '^[^_]\w+\s*\(\)' /usr/bin/set-lcd | sed 's/()//')
@@ -31,4 +29,5 @@ _lcd_set () {
         COMPREPLY=($(compgen -W "$variable_value" -- $cur))
     fi
 }
+
 complete -F _lcd_set set-lcd
