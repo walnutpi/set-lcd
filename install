@@ -14,43 +14,6 @@ echo_blue() {
 
 
 PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-VERSION=$(uname -r)
-VERSION_digit=${VERSION:0:1}
-
-
-# # 判断linux版本是否支持
-# case $VERSION_digit in
-#     5|6)
-#         echo_green "[OK]\t linux version is $VERSION "
-#     ;;
-#     *)
-#         echo_red "\n\nERROR: no support you linux version : \t$VERSION \n\n"
-#         exit -1
-#     ;;
-# esac
-
-
-
-# 树莓派要安装kernel-headers
-if [[ -f /proc/device-tree/model ]]; then
-    Board_model=$(cat "/proc/device-tree/model")
-    if [[ ${Board_model} == "Raspberry" ]]; then
-        sudo apt-get update
-        sudo apt-get install  cmake -y
-        echo_blue "Start to install the raspberrypi-kernel-headers"
-        apt install raspberrypi-kernel-headers xserver-xorg-input-evdev
-        
-        if [[ -f /usr/lib/modules/$(uname -r)//build/Makefile ]]; then
-            echo_green "[OK]\t kernel-headers has been installed"
-        else
-            echo_red "\n\nERROR: can not find kernel-headers \n\n"
-        fi
-        
-
-        
-        
-    fi
-fi
 
 # 为系统添加set-lcd命令
 chmod +x $PATH_PWD/set-lcd
@@ -74,8 +37,5 @@ fi
 
 
 
-echo_green "[OK]\t set-lcd is ready"
+echo_green "[OK]\t set-lcd install ready"
 
-echo_green "\n\nplease run this command :"
-echo_green "\n\t source /etc/bash_completion.d/set-lcd \n\n"
-# echo -e "\033[32m[ok]\033[0m"
