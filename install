@@ -14,6 +14,8 @@ echo_blue() {
 
 
 PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+PATH_DRIVER="${PATH_PWD}/drivers"
+PATH_DRIVER_SAVE="/lib/modules/$(uname -r)/kernel/wpi-drivers/"
 
 # 为系统添加set-lcd命令
 chmod +x $PATH_PWD/set-lcd
@@ -35,7 +37,7 @@ if ! grep -q  ${bash_str}  /etc/bash.bashrc; then
     echo ${bash_str} >> /etc/bash.bashrc
 fi
 
-
+source ${PATH_PWD}/compile_driver.sh
 
 echo_green "[OK]\t set-lcd install ready"
 
