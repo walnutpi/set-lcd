@@ -88,6 +88,7 @@ _disable_other() {
 
 install() {
     _disable_other
+    source ${PATH_PWD}/compile_driver.sh
     if [ $TFT_NAME == $FLAG_HDMI ];then
         return
     fi
