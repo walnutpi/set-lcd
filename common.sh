@@ -25,7 +25,7 @@ _try_command() {
     set -e
 }
 
-
+# 替换config.txt和release文件中的变量
 _flag_modify(){
     flag=$1
     flag_prefix="lcd="
@@ -34,6 +34,15 @@ _flag_modify(){
         sed -i "/$flag_prefix/d" "$release_file"
     fi
     echo "$flag_str" >> "$release_file"
+
+    config_txt="/boot/config.txt"
+    if grep -q "^screen=" "$config_txt"; then
+
+        sed -i "s/^screen=.*/screen=$flag/g" "$config_txt"
+    else
+        echo "screen=$flag" >> "$config_txt"
+    fi
+
 }
 
 
