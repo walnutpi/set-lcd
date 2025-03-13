@@ -10,21 +10,22 @@ if [ -z "$2" ]; then
     exit 1
 fi
 
-TFT_NAME=$1
 
 
 PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 PATH_TFT="${PATH_PWD}/tft"
-
-PATH_NOW_TFT="${PATH_TFT}/${TFT_NAME}"
-
 PATH_CONF="${PATH_PWD}/xorg-conf"
-PATH_DTB="${PATH_NOW_TFT}/dtb"
-PATH_calibration="${PATH_NOW_TFT}/xorg-calibration"
-
-
 source ${PATH_PWD}/common.sh
-source ${PATH_NOW_TFT}/tft
+source $release_file > /dev/null 2>&1
+
+TFT_NAME=$1
+PATH_NOW_TFT="${PATH_TFT}/${TFT_NAME}"
+PATH_DTB="${PATH_NOW_TFT}/dtb"
+
+
+if [ -f ${PATH_NOW_TFT}/tft ]; then
+    source ${PATH_NOW_TFT}/tft
+fi
 
 Board_model="walnutpi-"
 if [[ -f /proc/device-tree/model ]]; then
@@ -34,56 +35,11 @@ fi
 
 set -e
 
-_enable_modules() {
-    modules_file="/etc/modules"
-    for module in ${TFT_MODULE[@]}
-    do
-        _file_insert $modules_file $module
-    done
-}
-_disable_modules() {
-    modules_file="/etc/modules"
-    for module in ${TFT_MODULE[@]}
-    do
-        _file_delete $modules_file $module
-    done
-}
-
-
-# 更新设备树文件
-_updoad_dtbo() {
-    dts_files=$(find "$PATH_DTB" -type f -name "*${TFT_DTS_NAME}.dts")
-    for dts_file in $dts_files; do
-        dtbo_file="${dts_file%.dts}.dtbo"
-        dtc -@  -I dts -O dtb -o "$dtbo_file" "$dts_file"
-    done
-    
-    overlays_folder="/boot/overlays"
-    dtb_files=$(find "$PATH_DTB" -type f -name "*${TFT_DTS_NAME}.dtbo")
-    for file in $dtb_files; do
-        cp "$file" "$overlays_folder"
-    done
-    
-}
-
-_dtb_replace() {
-    local name=$1
-    local value=$2
-    
-    local searchString="$name = <[0-9]*>"
-    local replaceString="$name = <$value>"
-    
-    dts_files=$(find "$PATH_DTB" -type f -name "*${TFT_DTS_NAME}.dts")
-    for dts_file in $dts_files; do
-        dtbo_file="${dts_file%.dts}.dtbo"
-        sed -i "s/$searchString/$replaceString/g" $dts_file
-        dtc -@  -I dts -O dtb -o "$dtbo_file" "$dts_file"
-    done
-}
 
 set_rotate_switch="0 90 180 270"
 set_rotate() {
     OPT_operate=$1
+    PATH_calibration="${PATH_NOW_TFT}/xorg-calibration"
     
     if [[ ! $set_rotate_switch =~ (^|[[:space:]])$OPT_operate($|[[:space:]]) ]]; then
         echo -e "\033[31m[Error]\033[0m"
@@ -97,15 +53,16 @@ set_rotate() {
         fi
     fi
     
-    _dtb_replace "rotate" $OPT_operate
-    
-    _updoad_dtbo
+    dts_files=$(find "$PATH_DTB" -type f -name "*${TFT_DTS_NAME}.dts")
+    for dts_file in $dts_files; do
+        _dtb_replace_value $dts_file "rotate" $OPT_operate
+    done
+    _updoad_dtbo $PATH_DTB
     set-device
 }
 
 
 _remove_desktop() {
-    
     target_path="/usr/share/X11/xorg.conf.d"
     if [ -d "$target_path" ]; then
         for conf_file in ${USE_CONF_FILE[@]};
@@ -117,11 +74,6 @@ _remove_desktop() {
 }
 
 
-_run_set_device() {
-    _try_command set-device disable spidev1_0
-    _try_command set-device disable spidev1_1
-}
-
 _disable_other() {
     local all_board=$(ls -d $PATH_TFT/*/ | sed 's#/##' )
     local board
@@ -129,19 +81,25 @@ _disable_other() {
     do
         board=$(basename $board)
         if [[ $board != $TFT_NAME ]];then
-            set-lcd $board remove |> /dev/zero
+            _try_command set-lcd $board remove > /dev/null 2>&1
         fi
     done
 }
 
 install() {
     _disable_other
-    _run_set_device
-    _enable_modules
-    _updoad_dtbo
+    if [ $TFT_NAME == $FLAG_HDMI ];then
+        return
+    fi
+    _updoad_dtbo $PATH_DTB
     set-device enable $TFT_DTS_NAME
-    _add_flag
-
+    _try_command set-device disable spidev1_0
+    _try_command set-device disable spidev1_1
+    # 启用驱动
+    for module in ${TFT_MODULE[@]}
+    do
+        _enable_modules $module
+    done
     # 判断文件/boot/config.txt中是否有一行是hdmi_force_hotplug=1 如果有则改为hdmi_force_hotplug=0
     if grep -q "hdmi_force_hotplug=1" /boot/config.txt; then
         sed -i 's/hdmi_force_hotplug=1/hdmi_force_hotplug=0/g' /boot/config.txt
@@ -158,13 +116,20 @@ install() {
     fi
     
     set_rotate 270
+    _flag_modify $TFT_NAME
+
 }
 
 
 remove() {
-    _disable_modules
     _remove_desktop
-    _delete_flag
+    _flag_modify $FLAG_HDMI
+    # 删除对指定驱动的调用
+    for module in ${TFT_MODULE[@]}
+    do
+        _disable_modules $module
+    done
+
     set-device disable $TFT_DTS_NAME
     # 判断文件/boot/config.txt中是否有一行是#hdmi_force_hotplug=0 如果有则改为hdmi_force_hotplug=1
     if grep -q "hdmi_force_hotplug=0" /boot/config.txt; then
@@ -189,5 +154,4 @@ $FUNCTION_NAME $ARGUMENT
 if [[ $? -ne 0 ]]; then
     exit 1
 fi
-echo -e "\033[32m[ok]\033[0m"
-echo -e "\n\tplease reboot\n"
+echo -e "\033[32m[ok]\033[0m \tplease reboot\n"
