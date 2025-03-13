@@ -1,11 +1,8 @@
 #!/bin/bash
 echo "开始编译"
 
-
-KERNEL="/usr/lib/modules/$(uname -r)/build/"
-echo "KERNEL: $KERNEL"
-if [ ! -d $KERNEL ]; then
-    echo " $KERNEL not exist"
+if ! ls -d /usr/lib/modules/*/ > /dev/null 2>&1; then
+    echo "不存在非隐藏的子文件夹，退出脚本。"
     return
 fi
 
