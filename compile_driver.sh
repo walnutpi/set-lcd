@@ -6,7 +6,7 @@ KERNEL="/usr/lib/modules/$(uname -r)/build/"
 echo "KERNEL: $KERNEL"
 if [ ! -d $KERNEL ]; then
     echo " $KERNEL not exist"
-    exit
+    return
 fi
 
 
