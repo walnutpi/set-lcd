@@ -23,4 +23,8 @@ mkdir -p $PATH_DRIVER_SAVE
 cp -r ${PATH_DRIVER}/* $PATH_DRIVER_SAVE
 
 echo -e "\nupdate system drivers...."
+
+set +e
 depmod
+set -e
+echo "end"
