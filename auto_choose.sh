@@ -22,3 +22,4 @@ fi
 
 # echo "变动  $config_screen "
 set-lcd $config_screen install
+reboot
