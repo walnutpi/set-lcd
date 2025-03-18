@@ -5,6 +5,7 @@ EXTRA_CFLAGS=-DVERSION_DIGIT=$(VERSION_DIGIT)
 
 obj-y += lcd/
 obj-y += touch/
+obj-y += power/
 
 # KERNEL_PATH_UNAME := /usr/lib/modules/$(VERSION)/build/
 KERNEL_PATH_FIRST := $(shell ls -d /usr/lib/modules/*/build/ | head -n 1)

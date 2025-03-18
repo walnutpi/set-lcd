@@ -1,3 +1,3 @@
 TFT_DTS_NAME=dsi-800x480
-TFT_MODULE=( "rpi-ft5x06t" )
+TFT_MODULE=( "rpi-ft5x06t" "rpi-panel-attiny-regulator" )
 USE_CONF_FILE=( "45-evdev.conf" )
