@@ -6,6 +6,7 @@
 		target-path = "/";
 		__overlay__ {
 			panel_dsi: panel_dsi {
+				power0-supply = <&reg_display>;
 				status = "okay";
 				// enable0-gpios = <&pio PH 9 GPIO_ACTIVE_HIGH>;
 				// enable1-gpios = <&pio PH 10 GPIO_ACTIVE_HIGH>;
