@@ -1,7 +1,15 @@
 #!/bin/bash
 PATH_PWD="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 source ${PATH_PWD}/common.sh
+FLAG_FILE="/etc/screen-later"
 
+
+if [ -f $FLAG_FILE ];then
+    source $FLAG_FILE
+    set-lcd $screen install
+    rm $FLAG_FILE
+    exit
+fi
 
 get_config_screen() {
     source /boot/config.txt > /dev/null 2>&1
@@ -19,6 +27,7 @@ config_screen=$(get_config_screen)
 # t527上如果设置为dsi屏幕，但dsi屏幕通讯失败了，会导致后续其他驱动报错死机
 if [[ "$now_screen" == dsi* ]]; then
     if dmesg | grep -q "panel-dsi driver not probe"; then
+        echo "screen=$config_screen" > $FLAG_FILE
         config_screen="hdmi"
     fi
 fi
