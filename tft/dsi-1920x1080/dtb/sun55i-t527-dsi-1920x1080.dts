@@ -86,9 +86,9 @@
 		__overlay__ {
 			#address-cells = <1>;
 			#size-cells = <0>;
-			goodix_ts@14 {
+			goodix_ts@5d {
 				compatible = "goodix,wpi-gt9xx";
-				reg = <0x14>;// I2C地址
+				reg = <0x5d>;// I2C地址
 				status = "okay";
 			
 				// interrupt-parent = <&msm_gpio>;
