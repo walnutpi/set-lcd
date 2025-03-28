@@ -25,6 +25,7 @@
 #include <linux/hrtimer.h>
 #include <linux/i2c.h>
 #include <linux/input.h>
+#include <linux/input/touchscreen.h>
 #include <linux/module.h>
 #include <linux/delay.h>
 #include <linux/i2c.h>
@@ -169,6 +170,7 @@ struct goodix_ts_data {
 	int need_irq;
 	struct timer_list timer_work;
 	struct work_struct work_i2c_poll;
+	struct touchscreen_properties prop;
 };
 
 /************************* PART2:TODO define *******************************/

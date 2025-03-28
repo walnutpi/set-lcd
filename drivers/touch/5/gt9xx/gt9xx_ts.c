@@ -20,6 +20,7 @@
 #include <linux/platform_device.h>
 #include <linux/pinctrl/consumer.h>
 #include <linux/input/mt.h>
+#include <linux/input/touchscreen.h>
 #include "gt9xx.h"
 #include <linux/version.h>
 
@@ -561,6 +562,29 @@ static void gtp_type_a_report(struct goodix_ts_data *ts, u8 touch_num,
 	input_sync(ts->input_dev);
 }
 
+static void gtp_mouse_report(struct goodix_ts_data *ts, u8 touch_num,
+							   struct goodix_point_t *points)
+{
+	u16 cur_touch = 0;
+	static u16 pre_touch;
+	static u8 pre_pen_id;
+
+	if (touch_num && 0 == points->id)
+	{
+		input_report_key(ts->input_dev, BTN_TOUCH, 1);
+		touchscreen_report_pos(ts->input_dev, &ts->prop,points->x, points->y, false);
+		cur_touch |= 0x01 << points->id;
+		// points++;
+	}
+	else if (pre_touch & 0x01 )
+	{
+		input_report_key(ts->input_dev, BTN_TOUCH, 0);
+		input_report_abs(ts->input_dev, ABS_PRESSURE, 0);
+	}
+	pre_touch = cur_touch;
+	input_sync(ts->input_dev);
+}
+
 static void gtp_mt_slot_report(struct goodix_ts_data *ts, u8 touch_num,
 							   struct goodix_point_t *points)
 {
@@ -706,7 +730,8 @@ static void gtp_work_func(struct goodix_ts_data *ts)
 	}
 
 	if (!ts->pdata->type_a_report)
-		gtp_mt_slot_report(ts, point_state & 0x0f, points);
+		gtp_mouse_report(ts, point_state & 0x0f, points);
+	// gtp_mt_slot_report(ts, point_state & 0x0f, points);
 	else
 		gtp_type_a_report(ts, point_state & 0x0f, points);
 }
@@ -1894,6 +1919,52 @@ static s8 gtp_request_input_dev(struct goodix_ts_data *ts)
 	return 0;
 }
 
+static s8 gtp_request_input_dev_as_mouse(struct goodix_ts_data *ts)
+{
+	s8 ret = -1;
+	u8 index = 0;
+
+	ts->input_dev = input_allocate_device();
+	ts->input_dev->dev.parent = &ts->client->dev;
+	if (!ts->input_dev)
+	{
+		dev_err(&ts->client->dev, "Failed to allocate input device\n");
+		return -ENOMEM;
+	}
+
+	ts->input_dev->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
+	ts->input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
+
+	input_set_abs_params(ts->input_dev, ABS_X,
+		0, ts->pdata->abs_size_x - 1, 0, 0);
+	input_set_abs_params(ts->input_dev, ABS_Y,
+		0, ts->pdata->abs_size_y - 1, 0, 0);
+	touchscreen_parse_properties(ts->input_dev, false, &ts->prop);
+
+	input_mt_init_slots(ts->input_dev, 16, INPUT_MT_DIRECT);
+	dev_info(&ts->client->dev, "Use slot report protocol\n");
+
+	if (ts->pdata->swap_x2y)
+		GTP_SWAP(ts->pdata->abs_size_x, ts->pdata->abs_size_y);
+
+	ts->input_dev->name = goodix_ts_name;
+	ts->input_dev->phys = goodix_input_phys;
+	ts->input_dev->id.bustype = BUS_I2C;
+	ts->input_dev->id.vendor = 0xDEAD;
+	ts->input_dev->id.product = 0xBEEF;
+	ts->input_dev->id.version = 10427;
+
+	ret = input_register_device(ts->input_dev);
+	if (ret)
+	{
+		dev_err(&ts->client->dev, "Register %s input device failed\n",
+				ts->input_dev->name);
+		input_free_device(ts->input_dev);
+		return -ENODEV;
+	}
+
+	return 0;
+}
 /*
  * Devices Tree support
  */
@@ -2387,7 +2458,8 @@ static int gtp_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	if (ret < 0)
 		dev_info(&client->dev, "Panel un-initialize\n");
 
-	ret = gtp_request_input_dev(ts);
+	ret = gtp_request_input_dev_as_mouse(ts);
+	// ret = gtp_request_input_dev(ts);
 	if (ret < 0)
 	{
 		dev_err(&client->dev, "Failed request input device\n");

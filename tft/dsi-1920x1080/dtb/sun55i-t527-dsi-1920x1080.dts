@@ -88,59 +88,28 @@
 			#size-cells = <0>;
 			goodix_ts@5d {
 				compatible = "goodix,wpi-gt9xx";
-				reg = <0x5d>;// I2C地址
+				reg = <0x5d>;
 				status = "okay";
-			
-				// interrupt-parent = <&msm_gpio>;
-				// interrupts = <13 0x2800>;
-				// pinctrl-names = "default", "int-output-low","int-output-high", "int-input";
-				// pinctrl-0 = <&ts_int_default>;
-				// pinctrl-1 = <&ts_int_output_low>;
-				// pinctrl-2 = <&ts_int_output_high>;
-				// pinctrl-3 = <&ts_int_input>;
-			
-				// reset-gpios = <&msm_gpio 12 0x0>;
-				// irq-gpios = <&msm_gpio 13 0x2800>;
-				// irq-flags = <2>;
-			
-				touchscreen-max-id = <11>;
-				touchscreen-size-x = <1080>;
 				touchscreen-size-y = <1920>;
-				touchscreen-max-w = <512>;
-				touchscreen-max-p = <512>;
-				touchscreen-key-map = <172>, <158>; /*KEY_HOMEPAGE=172, KEY_BACK=158，KEY_MENU=139*/
+				touchscreen-size-x = <1080>;
 			
 				goodix,slide-wakeup = <0>;
 				goodix,type-a-report = <0>;
-				goodix,driver-send-cfg = <0>;
+				goodix,report-stylus = <1>;
+				goodix,driver-send-cfg = <1>;
 				goodix,send-cfg-id = <0>;
 				goodix,resume-in-workqueue = <0>;
-				goodix,int-sync = <1>;
-				goodix,swap-x2y = <0>;
 				goodix,revert_x = <0>;
 				goodix,revert_y = <0>;
+				goodix,swap-x2y = <0>;
 				goodix,esd-protect = <0>;
 				goodix,auto-update-cfg = <0>;
 				goodix,power-off-sleep = <0>;
 				goodix,pen-suppress-finger = <0>;
 				goodix,cfg-group0 = [
-				53 D0 02 00 05 05 F5 D5 21 48 2D 0F 5A 41 0E 05 00 00 32 32 20 00 05 14 14 1A 14 8B 2B 00
+				43 38 04 80 07 0A 85 00 01 08 28 05 50 32 03 05 00 00 00 00 00 00 00 00 00 00 00 8C 2C 0C 17 15 0C 08 00 00 03 BA 04 1C 00 00 00 00 00 03 64 32 00 00 00 0F 36 94 C5 02 07 00 00 04 9B 11 00 7C 16 00 66 1C 00 52 25 00 45 2F 00 45 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 18 16 14 12 10 0E 0C 0A 08 06 04 02 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF 14 13 12 10 0F 0C 0A 08 06 04 02 00 16 18 1C 1D 1E 1F 20 21 22 24 26 28 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF 23 01
 				];
 			}; 
-			
-			
-			// ft5406: ts@38 {
-			// 	compatible = "edt,rpi-ft5506";
-			// 	reg = <0x38>;
-			// 	touchscreen-size-x = < 800 >;
-			// 	touchscreen-size-y = < 480 >;
-			// };
-			// reg_display: reg_display@45 {
-			// 	compatible = "raspberrypi,7inch-touchscreen-panel-regulator";
-			// 	reg = <0x45>;
-			// 	gpio-controller;
-			// 	#gpio-cells = <2>;
-			// };
 		};
 	};
 };
