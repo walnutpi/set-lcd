@@ -1,0 +1,3 @@
+TFT_DTS_NAME=dsi-1280x800
+TFT_MODULE=( "wpi-jd9366-touch" )
+USE_CONF_FILE=( "45-evdev.conf" )
