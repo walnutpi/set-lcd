@@ -2,6 +2,7 @@
 #include <linux/i2c.h>
 #include <linux/input.h>
 #include <linux/input/mt.h>
+#include <linux/input/touchscreen.h>
 #include <linux/delay.h>
 #include <linux/slab.h>
 #include <linux/interrupt.h>
@@ -12,12 +13,13 @@
 
 #define WPI_JD9366_NAME "wpi-jd9366-touch"
 #define CHIP_ID 0x9032
-#define POLL_INTERVAL_MS 30
+#define POLL_INTERVAL_MS 15
 
 struct wpi_jd9366_data
 {
     struct i2c_client *client;
     struct input_dev *input_dev;
+    struct touchscreen_properties absinfo;
     int touch_size_x;
     int touch_size_y;
     bool report_as_mouse;
@@ -42,19 +44,46 @@ struct TouchStatus
 static void report_touch_event(struct wpi_jd9366_data *data, struct TouchStatus *points)
 {
     int i;
-    
-    for (i = 0; i < 10; i++) {
-        input_mt_slot(data->input_dev, i);
-        if (points[i].pressed) {
-            input_mt_report_slot_state(data->input_dev, MT_TOOL_FINGER, true);
-            input_report_abs(data->input_dev, ABS_MT_POSITION_X, points[i].x);
-            input_report_abs(data->input_dev, ABS_MT_POSITION_Y, points[i].y);
-        } else {
-            input_mt_report_slot_state(data->input_dev, MT_TOOL_FINGER, false);
+
+    if (data->report_as_mouse)
+    {
+        for (i = 0; i < 10; i++)
+        {
+            if (points[i].pressed)
+            {
+                input_report_key(data->input_dev, BTN_TOUCH, 1);
+                input_report_abs(data->input_dev, ABS_X, points[i].x);
+                input_report_abs(data->input_dev, ABS_Y, points[i].y);
+                input_report_abs(data->input_dev, ABS_PRESSURE, 1);
+                break; // 只报告第一个可用触摸点
+            }
         }
+        if (!points[0].pressed)
+        {
+            input_report_key(data->input_dev, BTN_TOUCH, 0);
+            input_report_abs(data->input_dev, ABS_PRESSURE, 0);
+        }
+        input_sync(data->input_dev);
     }
-    
-    input_sync(data->input_dev);
+    else
+    {
+        for (i = 0; i < 10; i++)
+        {
+            input_mt_slot(data->input_dev, i);
+            if (points[i].pressed)
+            {
+                input_mt_report_slot_state(data->input_dev, MT_TOOL_FINGER, true);
+                input_report_abs(data->input_dev, ABS_MT_POSITION_X, points[i].x);
+                input_report_abs(data->input_dev, ABS_MT_POSITION_Y, points[i].y);
+            }
+            else
+            {
+                input_mt_report_slot_state(data->input_dev, MT_TOOL_FINGER, false);
+            }
+        }
+
+        input_sync(data->input_dev);
+    }
 }
 
 static void touch_work_func(struct wpi_jd9366_data *data)
@@ -63,6 +92,9 @@ static void touch_work_func(struct wpi_jd9366_data *data)
     u8 cmd[] = {0x20, 0x02, 0x11, 0x20}; // 32位地址倒序
     u8 read_data[80];
     int i;
+    int actual_x;
+    int actual_y;
+
     struct TouchStatus touch_points[10];
     memset(touch_points, 0, sizeof(touch_points));
 
@@ -82,22 +114,25 @@ static void touch_work_func(struct wpi_jd9366_data *data)
 
     if (read_data[0] == 0)
         goto report;
+    // dev_info(&data->client->dev, "Touch count %d \n", read_data[0]);
 
     for (i = 0; i < 10; i++)
     {
         struct TouchPoint_Format *point = (struct TouchPoint_Format *)&read_data[3 + i * 5];
 
-        if (point->x_area_id > 2 || point->y_area_id > 4)
+        if (point->x_area_id > 100 || point->y_area_id > 100)
         {
             // dev_info(&data->client->dev, "Touch point %d: --  --\n", i + 1);
             touch_points[i].pressed = false;
             continue;
         }
 
-        int actual_x = point->x_area_id * (data->touch_size_x / 3) +
-                       ((unsigned int)point->x * (data->touch_size_x / 3)) / 255;
-        int actual_y = point->y_area_id * (data->touch_size_y / 5) +
-                       ((unsigned int)point->y * (data->touch_size_y / 5)) / 255;
+        // actual_x = point->x_area_id * (data->touch_size_x / 3) +
+        //                ((unsigned int)point->x * (data->touch_size_x / 3)) / 255;
+        // actual_y = point->y_area_id * (data->touch_size_y / 5) +
+        //                ((unsigned int)point->y * (data->touch_size_y / 5)) / 255;
+        actual_x = point->x_area_id * 255 + point->x;
+        actual_y = point->y_area_id * 255 + point->y;
 
         if (actual_x > data->touch_size_x)
             actual_x = data->touch_size_x;
@@ -209,18 +244,39 @@ static int wpi_jd9366_probe(struct i2c_client *client,
     data->input_dev->id.bustype = BUS_I2C;
     data->input_dev->dev.parent = &client->dev;
 
-    // Set up multi-touch capabilities
-    __set_bit(EV_ABS, data->input_dev->evbit);
-    __set_bit(INPUT_PROP_DIRECT, data->input_dev->propbit);
-    
-    // Configure multi-touch parameters
-    input_mt_init_slots(data->input_dev, 10, INPUT_MT_DIRECT | INPUT_MT_DROP_UNUSED);
-    
-    // Set absolute axis ranges
-    input_set_abs_params(data->input_dev, ABS_MT_POSITION_X, 0, data->touch_size_x, 0, 0);
-    input_set_abs_params(data->input_dev, ABS_MT_POSITION_Y, 0, data->touch_size_y, 0, 0);
-    input_set_abs_params(data->input_dev, ABS_MT_TOOL_TYPE, 0, MT_TOOL_MAX, 0, 0);
-    input_set_abs_params(data->input_dev, ABS_MT_SLOT, 0, 9, 0, 0);
+    if (data->report_as_mouse)
+    {
+        // 配置为鼠标模式
+        __set_bit(EV_KEY, data->input_dev->evbit);
+        __set_bit(EV_ABS, data->input_dev->evbit);
+        __set_bit(BTN_TOUCH, data->input_dev->keybit);
+
+        // 设置绝对坐标范围
+        input_set_abs_params(data->input_dev, ABS_X, 0, data->touch_size_x, 0, 0);
+        input_set_abs_params(data->input_dev, ABS_Y, 0, data->touch_size_y, 0, 0);
+        input_set_abs_params(data->input_dev, ABS_PRESSURE, 0, 255, 0, 0);
+
+        // 初始化触摸屏属性 - 修复函数调用参数
+        touchscreen_parse_properties(data->input_dev, false, &data->absinfo);
+    }
+    else
+    {
+        // Set up multi-touch capabilities
+        __set_bit(EV_ABS, data->input_dev->evbit);
+        __set_bit(INPUT_PROP_DIRECT, data->input_dev->propbit);
+
+        // Configure multi-touch parameters
+        input_mt_init_slots(data->input_dev, 10, INPUT_MT_DIRECT | INPUT_MT_DROP_UNUSED);
+
+        // Set absolute axis ranges
+        input_set_abs_params(data->input_dev, ABS_MT_POSITION_X, 0, data->touch_size_x, 0, 0);
+        input_set_abs_params(data->input_dev, ABS_MT_POSITION_Y, 0, data->touch_size_y, 0, 0);
+        input_set_abs_params(data->input_dev, ABS_MT_TOOL_TYPE, 0, MT_TOOL_MAX, 0, 0);
+        input_set_abs_params(data->input_dev, ABS_MT_SLOT, 0, 9, 0, 0);
+
+        // 初始化触摸屏属性
+        touchscreen_parse_properties(data->input_dev, true, &data->absinfo);
+    }
 
     ret = input_register_device(data->input_dev);
     if (ret)
