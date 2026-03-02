@@ -154,12 +154,21 @@ static int fbtft_backlight_get_brightness(struct backlight_device *bd)
 
 void fbtft_unregister_backlight(struct fbtft_par *par)
 {
+#if VERSION_DIGIT_SECONDE > 5
+	if (par->bl_dev) {
+		par->bl_dev->props.power = FB_BLANK_POWERDOWN;
+		backlight_update_status(par->bl_dev);
+		backlight_device_unregister(par->bl_dev);
+		par->bl_dev = NULL;
+	}
+#else
 	if (par->info->bl_dev) {
 		par->info->bl_dev->props.power = FB_BLANK_POWERDOWN;
 		backlight_update_status(par->info->bl_dev);
 		backlight_device_unregister(par->info->bl_dev);
 		par->info->bl_dev = NULL;
 	}
+#endif
 }
 EXPORT_SYMBOL(fbtft_unregister_backlight);
 
@@ -194,7 +203,11 @@ void fbtft_register_backlight(struct fbtft_par *par)
 			PTR_ERR(bd));
 		return;
 	}
+#if VERSION_DIGIT_SECONDE > 5
+	par->bl_dev = bd;
+#else
 	par->info->bl_dev = bd;
+#endif
 
 	if (!par->fbtftops.unregister_backlight)
 		par->fbtftops.unregister_backlight = fbtft_unregister_backlight;
@@ -687,8 +700,11 @@ struct fb_info *fbtft_framebuffer_alloc(struct fbtft_display *display,
 	info->var.transp.offset =  0;
 	info->var.transp.length =  0;
 
-	info->flags =              FBINFO_FLAG_DEFAULT | FBINFO_VIRTFB;
-
+#if VERSION_DIGIT_SECONDE > 5
+	info->flags = FBINFO_VIRTFB ;
+#else
+	info->flags = FBINFO_FLAG_DEFAULT | FBINFO_VIRTFB;
+#endif
 	par = info->par;
 	par->info = info;
 	par->pdata = pdata;
@@ -851,11 +867,17 @@ int fbtft_register_framebuffer(struct fb_info *fb_info)
 		 HZ / fb_info->fbdefio->delay, text2);
 
 	/* Turn on backlight if available */
-	if (fb_info->bl_dev) {
-		fb_info->bl_dev->props.power = FB_BLANK_UNBLANK;
-		fb_info->bl_dev->ops->update_status(fb_info->bl_dev);
+#if VERSION_DIGIT_SECONDE > 5
+	if (par->bl_dev) {
+		par->bl_dev->props.power = FB_BLANK_UNBLANK;
+		par->bl_dev->ops->update_status(par->bl_dev);
 	}
-
+#else
+	if (par->info->bl_dev) {
+		par->info->bl_dev->props.power = FB_BLANK_UNBLANK;
+		par->info->bl_dev->ops->update_status(par->info->bl_dev);
+	}
+#endif
 	return 0;
 
 reg_fail:

@@ -229,6 +229,9 @@ struct fbtft_par {
 	bool bgr;
 	void *extra;
 	bool polarity;
+#if VERSION_DIGIT_SECONDE > 5
+	struct backlight_device *bl_dev;
+#endif
 };
 
 #define NUMARGS(...)  (sizeof((int[]){__VA_ARGS__}) / sizeof(int))
