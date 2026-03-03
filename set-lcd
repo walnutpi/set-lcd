@@ -58,6 +58,7 @@ set_rotate() {
         _dtb_replace_value $dts_file "rotate" $OPT_operate
     done
     _updoad_dtbo $PATH_DTB
+    echo "PATH_DTB: $PATH_DTB"
     set-device
 }
 
@@ -94,8 +95,8 @@ install() {
     fi
     _updoad_dtbo $PATH_DTB
     set-device enable $TFT_DTS_NAME
-    _try_command set-device disable spidev1_0
-    _try_command set-device disable spidev1_1
+    _run_command_client set-device disable spidev1_0
+    _run_command_client set-device disable spidev1_1
     # 启用驱动
     for module in ${TFT_MODULE[@]}
     do

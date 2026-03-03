@@ -1,0 +1,3 @@
+TFT_DTS_NAME=lcd35-st7701-480x800
+TFT_MODULE=(  )
+USE_CONF_FILE=( "45-evdev.conf" )

@@ -24,6 +24,11 @@ _try_command() {
     "$@"
     set -e
 }
+_run_command_client() {
+    set +e
+    "$@" >/dev/null 2>&1
+    set -e
+}
 
 # 替换config.txt和release文件中的变量
 _flag_modify(){
@@ -65,6 +70,7 @@ _disable_modules() {
 
 # 传入存放设备树的文件夹路径，将所有文件编译后存放到overlays文件夹
 _updoad_dtbo() {
+    echo "Uploading dtbo..."
     dtb_file_path=$1
     dts_files=$(find "$dtb_file_path" -type f -name "*.dts")
     for dts_file in $dts_files; do
@@ -75,6 +81,7 @@ _updoad_dtbo() {
     overlays_folder="/boot/overlays"
     dtb_files=$(find "$dtb_file_path" -type f -name "*.dtbo")
     for file in $dtb_files; do
+        echo "Uploading $file..."
         cp "$file" "$overlays_folder"
     done
     
