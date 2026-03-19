@@ -5,6 +5,7 @@ VERSION_DIGIT_SECONDE=$(shell ls /usr/lib/modules/ | cut -c 3)
 
 ifeq ($(shell test $(VERSION_DIGIT) -eq 6 && test $(VERSION_DIGIT_SECONDE) -gt 5 && echo ok), ok)
 obj-m +=  ads7846-6.6.o
+obj-m +=  cts128.o
 else
 obj-m +=  ads7846.o
 endif
