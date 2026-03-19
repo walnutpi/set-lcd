@@ -1,14 +1,4 @@
 #!/bin/bash
-if [ -z "$1" ]; then
-    echo -e "\033[31m[Error]\033[0m"
-    echo "please choose tft"
-    exit 1
-fi
-if [ -z "$2" ]; then
-    echo -e "\033[31m[Error]\033[0m"
-    echo "please choose Function"
-    exit 1
-fi
 
 
 
@@ -18,10 +8,21 @@ PATH_CONF="${PATH_PWD}/xorg-conf"
 source ${PATH_PWD}/common.sh
 source $release_file > /dev/null 2>&1
 
-TFT_NAME=$1
+
+
+if  [ -z "$1" ]; then
+    # 如果一个参数都没有传入
+    TFT_NAME=$(grep "^screen=" /boot/config.txt | cut -d'=' -f2-)
+    FUNCTION_NAME="install"
+else
+    TFT_NAME=$1
+    FUNCTION_NAME=$2
+    ARGUMENT=$3
+fi
+
+
 PATH_NOW_TFT="${PATH_TFT}/${TFT_NAME}"
 PATH_DTB="${PATH_NOW_TFT}/dtb"
-
 
 if [ -f ${PATH_NOW_TFT}/tft ]; then
     source ${PATH_NOW_TFT}/tft
@@ -148,12 +149,9 @@ fi
 
 
 
-
-FUNCTION_NAME=$2
-ARGUMENT=$3
 $FUNCTION_NAME $ARGUMENT
 
-if [[ $? -ne 0 ]]; then
-    exit 1
-fi
-echo -e "\033[32m[ok]\033[0m \tplease reboot\n"
+# if [[ $? -ne 0 ]]; then
+#     exit 1
+# fi
+# echo -e "\033[32m[ok]\033[0m \tplease reboot\n"
