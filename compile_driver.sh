@@ -15,7 +15,7 @@ PATH_DRIVER_SAVE="${MODULE_PATH}/kernel/wpi-drivers/"
 
 echo "compile drivers"
 make -C ${PATH_DRIVER}
-echo "编译完成"
+
 if [ -d $PATH_DRIVER_SAVE ]; then
     rm -r $PATH_DRIVER_SAVE
 fi
@@ -24,7 +24,5 @@ cp -r ${PATH_DRIVER}/* $PATH_DRIVER_SAVE
 
 echo -e "\nupdate system drivers...."
 
-set +e
-depmod
-set -e
-echo "end"
+kernel_versions=($(ls -1 "/lib/modules" 2>/dev/null | grep -E '^[0-9]+\.[0-9]+\.'))
+depmod -a "$kernel_versions"
