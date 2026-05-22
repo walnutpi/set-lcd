@@ -8,11 +8,14 @@ PATH_CONF="${PATH_PWD}/xorg-conf"
 source ${PATH_PWD}/common.sh
 source $release_file > /dev/null 2>&1
 
-
+# 如果文件 /boot/config.txt 不存在，则退出
+if [ ! -f /boot/config.txt ]; then
+    exit 0
+fi
 
 if  [ -z "$1" ]; then
     # 如果一个参数都没有传入
-    TFT_NAME=$(grep "^screen=" /boot/config.txt | cut -d'=' -f2-)
+    TFT_NAME="$(grep "^screen=" /boot/config.txt | cut -d'=' -f2-)"
     FUNCTION_NAME="install"
 else
     TFT_NAME=$1
@@ -34,7 +37,6 @@ if [[ -f /proc/device-tree/model ]]; then
 fi
 
 
-set -e
 
 
 set_rotate_switch="0 90 180 270"
@@ -91,7 +93,7 @@ _disable_other() {
 install() {
     _disable_other
     source ${PATH_PWD}/compile_driver.sh
-    if [ $TFT_NAME == $FLAG_HDMI ];then
+    if [ "x$TFT_NAME" == "x$FLAG_HDMI" ];then
         return
     fi
     _updoad_dtbo $PATH_DTB
@@ -150,8 +152,3 @@ fi
 
 
 $FUNCTION_NAME $ARGUMENT
-
-# if [[ $? -ne 0 ]]; then
-#     exit 1
-# fi
-# echo -e "\033[32m[ok]\033[0m \tplease reboot\n"
