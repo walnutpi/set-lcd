@@ -17,7 +17,7 @@
 					};
 				};
 			};
-			
+
 			lcd: panel@0 {
 				dsi_reset-gpios = <&gpio0_ports 24 0>;//GPIO_ACTIVE_HIGH
 				backlight_gpio-gpios = <&gpio0_ports 25 0>;//GPIO_ACTIVE_HIGH
@@ -138,6 +138,16 @@
 				cts128,y-flip = <0>;
 				status = "okay";
 			};
+		};
+	};
+	fragment@3 {
+		target-path = "/";
+		__overlay__ {
+			backlight: backlight {
+				compatible = "pwm-backlight";
+				pwms = <&pwm3_5 2 100000 1>;  /* pwm3_5控制器, 通道2, 周期100ns, 反向极性 */
+				brightness-levels = <255 250 240 230 220 200 180 150 100 50 0 >;
+				default-brightness-level = <8>;
 		};
 	};
 };
