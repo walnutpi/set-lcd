@@ -15,6 +15,7 @@ export BOARD_MODEL
 obj-y += lcd/
 obj-y += touch/
 obj-y += power/
+obj-y += imu/
 
 # KERNEL_PATH_UNAME := /usr/lib/modules/$(VERSION)/build/
 KERNEL_PATH_FIRST := $(shell ls -d /usr/lib/modules/*/build/ | head -n 1)

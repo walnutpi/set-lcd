@@ -138,6 +138,11 @@
 				cts128,y-flip = <0>;
 				status = "okay";
 			};
+
+			accel@12 {
+				compatible = "qst,qma6100p";
+				reg = <0x12>;
+			};
 		};
 	};
 	fragment@3 {
