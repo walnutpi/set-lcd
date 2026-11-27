@@ -2,6 +2,7 @@ ifeq ($(BOARD_MODEL),walnutpi-1b)
 obj-m +=  ads7846.o
 else ifeq ($(BOARD_MODEL),walnutpi-2b)
 obj-y +=  gt9xx/
+obj-y +=  gt9xx-mouse/
 obj-m +=  wpi-jd9366-touch.o
 obj-m +=  ads7846.o
 obj-m +=  rpi-ft5x06.o
@@ -11,6 +12,7 @@ else ifeq ($(BOARD_MODEL),cybercam)
 else
 # 未知板子，全量编译
 obj-y +=  gt9xx/
+obj-y +=  gt9xx-mouse/
 obj-m +=  wpi-jd9366-touch.o
 obj-m +=  ads7846.o
 obj-m +=  rpi-ft5x06.o

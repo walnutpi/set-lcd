@@ -1,0 +1,114 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target-path = "/";
+		__overlay__ {
+			panel_dsi: panel_dsi {
+				status = "okay";
+				enable-delay-ms = <100>;
+				dsi,flags = <1>;//MIPI_DSI_MODE_VIDEO
+				dsi,lanes = <4>;
+				dsi,format = <0>;//MIPI_DSI_FMT_RGB888
+				panel-init-sequence = [
+					39 00 04 df 91 68 f9
+					15 00 02 de 00
+					39 00 03 b2 00 7e
+					39 00 03 b3 00 7e
+					39 00 07 c1 00 10 00 00 00 00
+					39 00 08 bb 02 24 07 61 19 44 44
+					39 00 03 be 1a f2
+					39 00 0f c3 10 17 5a 17 5a 05 05 05 05 15 15 31 05 df
+					39 00 08 c4 11 80 00 df 09 06 14
+					39 00 18 ce 00 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 0f 03
+					39 00 0a cf 00 01 40 01 ca 01 ca 01 ca
+					39 00 18 d0 00 1f 1f 1f 1f 1f 1f 1f 1f 1f 1f 03 01 05 07 09 0b 1e 15 1f 1f 15 1f
+					39 00 18 d1 00 1f 1f 1f 1f 1f 1f 1f 1f 1f 1f 02 00 04 06 08 0a 1e 15 1f 1f 15 1f
+					39 00 18 d2 00 1f 1f 1f 1f 1f 1f 1f 1f 1f 1f 00 02 0a 08 06 04 1f 15 1f 1f 15 1e
+					39 00 18 d3 00 1f 1f 1f 1f 1f 1f 1f 1f 1f 1f 01 03 0b 09 07 05 1f 15 1f 1f 15 1e
+					39 00 26 d4 30 00 00 04 00 06 00 00 00 00 00 03 03 00 11 00 01 c0 04 01 01 11 80 01 c0 05 01 01 00 00 00 04 00 06 18 02 e3
+					39 00 09 d5 68 73 00 08 08 00 03 00
+					39 00 07 b7 00 d8 00 00 d8 00
+					39 00 27 c8 7f 69 5a 4e 4a 3b 40 2a 44 43 44 63 51 59 4c 48 3a 28 0f 7f 69 5a 4e 4a 3b 40 2a 44 43 44 63 51 59 4c 48 3a 28 0f
+					15 00 02 de 02
+					39 00 05 bb 00 5b 5c 41
+					39 00 04 b5 00 5a 0a
+					15 00 02 c6 22
+					15 00 02 d7 12
+					39 00 03 e7 00 00
+					15 00 02 de 04
+					15 00 02 cc 02
+					15 00 02 e7 01
+					15 00 02 de 00
+					15 00 02 35 00
+					05 78 01 11
+					05 14 01 29
+				];
+				panel-exit-sequence = [
+					05 00 01 28
+					05 14 01 10
+				];
+				display-timings {
+					native-mode = <&timing0>;
+					timing0: timing0 {
+						clock-frequency = <58000000>;// lane rate 312Mbps，贴近屏标称 300M(PLL 150M)；combophy 实测可锁定
+						hback-porch = <60>;
+						hactive = <1024>;
+						hfront-porch = <68>;
+						hsync-len = <8>;
+						vback-porch = <24>;
+						vactive = <768>;
+						vfront-porch = <12>;
+						vsync-len = <4>;
+					};
+				};
+			};
+		};
+	};
+	fragment@1 {
+		target = <&dsi0>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+			
+		};
+	};
+	fragment@2 {
+		target = <&twi3>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			goodix_ts@5d {
+				// compatible = "goodix,wpi-gt9xx";
+				compatible = "goodix,wpi-gt9xx-mouse";
+				reg = <0x5d>;
+				status = "okay";
+				touchscreen-size-x = <1024>;
+				touchscreen-size-y = <768>;
+				touchscreen-swap-x-y = <0>;
+				touchscreen-invert-x = <0>;
+				touchscreen-invert-y = <0>;
+			};
+			gp7101_backlight: backlight@58 {
+				compatible = "wpi,gp7101-backlight";
+				reg = <0x58>;
+				status = "okay";
+				label = "backlight0";
+				// 低电平点亮的屏加: inverted-backlight;
+				default-brightness = <255>;
+			};
+		};
+	};
+	fragment@3 {
+		target = <&backlight0>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "disabled";
+			
+		};
+	};
+};
+
